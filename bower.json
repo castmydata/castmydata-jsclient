@@ -1,5 +1,5 @@
 {
-  "name": "castmydata-client",
+  "name": "castmydata-jsclient",
   "description": "Client for CastMyData",
   "main": "src/castmydata.js",
   "authors": [
