@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CastMyData</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
+    <style>
+        .list-group-item {
+            min-height: 56px;
+        }
+    </style>
+</head>
+<body>
+    <a href="https://github.com/castmydata/castmydata-jsclient"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    
+    <div class="container">
+    
+        <h1 class="page-heading">CastMyData</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <p class="lead">Realtime database in one line.</p>
+<pre>
+var endpoint = 
+    NgCastMyDataEndpoint('testendpoint')
+    .bindToScope($scope, 'records');
+    // that's it!
+</pre>
+                <hr>
+                <h2>Scripts</h2>
+                <dl>
+                    <dt>castmydata.js:</dt>
+                    <dd>&lt;script src=&quot;{{href}}castmydata.js&quot;&gt;&lt;/script&gt;</dd>
+                    <br>
+                    <dt>ng-castmydata.js:</dt>
+                    <dd>(To use CastMyData with Angular 1)</dd>
+                    <dd>&lt;script src=&quot;{{href}}ng-castmydata.js&quot;&gt;&lt;/script&gt;</dd>
+                    <dd>&lt;script src=&quot;{{href}}ng-castmydata.min.js&quot;&gt;&lt;/script&gt;</dd>
+                </dl>
+            </div>
+            <div class="col-md-4">
+                <h3>Example 1: Broadcasting</h3>
+                <p><a class="link" target="_blank">Open Another Tab</a></p>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        Last message received: <span id="received"></span>    
+                    </li>
+                    <li class="list-group-item">
+                        <form onsubmit="return broadcast()">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="message" placeholder="Broadcast">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-primary">
+                                        <i class="glyphicon glyphicon-send"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h3>Example 2: Realtime Database</h3>
+                <p><a class="link" target="_blank">Open Another Tab</a></p>
+                <ul class="list-group">
+                    <li class="list-group-item todo-template">
+                        <div class="btn-group pull-right">
+                            <button class="btn btn-danger delete-btn">
+                                <i class="glyphicon glyphicon-remove"></i>
+                            </button>
+                            <button class="btn btn-info edit-btn">
+                                <i class="glyphicon glyphicon-edit"></i>
+                            </button>
+                        </div>
+                        <span class="name"></span>
+                    </li>
+                    <li class="list-group-item" id="todo-forms">
+                        <form id="todoForm" onsubmit="return saveTodo()">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="name" placeholder="Create New Todo Item">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-primary">
+                                        <i class="glyphicon glyphicon-floppy-disk"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                        <form id="editForm" onsubmit="return saveEdittingTodo()">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="editName" placeholder="Edit Todo Item">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-warning" type="button" onclick="cancelEdit()">
+                                        <i class="glyphicon glyphicon-floppy-remove"></i>
+                                    </button>
+                                    <button class="btn btn-primary">
+                                        <i class="glyphicon glyphicon-floppy-saved"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
+    <script src="castmydata.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

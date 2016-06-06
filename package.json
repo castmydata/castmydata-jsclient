@@ -1,0 +1,27 @@
+{
+  "name": "castmydata-client",
+  "version": "0.0.0",
+  "description": "Client for CastMyData",
+  "main": "dist/castmydata.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/castmydata/castmydata-jsclient.git"
+  },
+  "author": "Zulfa Juniadi <zulfajuniadi@gmail.com> (http://www.zulfajuniadi.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/castmydata/castmydata-jsclient/issues"
+  },
+  "homepage": "https://github.com/castmydata/castmydata-jsclient#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.5.3"
+  },
+  "dependencies": {
+    "socket.io-client": "^1.4.6"
+  }
+}

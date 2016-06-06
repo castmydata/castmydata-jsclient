@@ -1,0 +1,20 @@
+{
+  "name": "castmydata-client",
+  "description": "Client for CastMyData",
+  "main": "src/castmydata.js",
+  "authors": [
+    "Zulfa Juniadi <zulfajuniadi@gmail.com> (http://www.zulfajuniadi.com)"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/castmydata/castmydata-jsclient",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "socket.io-client": "^1.4.6"
+  }
+}
