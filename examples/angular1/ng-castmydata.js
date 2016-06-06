@@ -1,1 +1,0 @@
-../../src/ng-castmydata.js

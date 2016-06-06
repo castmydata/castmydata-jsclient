@@ -1,5 +1,5 @@
 
-var endpoint = new CastMyData.Endpoint('http://www.castmydata.com', 'testendpoint');
+var endpoint = new CastMyData.Endpoint('https://www.castmydata.com', 'testendpoint');
 
 
 // Example 1: Broadcasting
