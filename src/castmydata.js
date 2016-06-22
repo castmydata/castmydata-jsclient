@@ -125,7 +125,7 @@
         var socket = this._socket = socketioClient(CastMyDataServer, {
             multiplex: false
         });
-        var models = [];
+        var models = this.models = [];
         var that = this;
 
         this._events = {};
@@ -175,13 +175,35 @@
         socket.on('broadcast', function(data){
             that.emit('broadcast', data.payload);
         });
-
-        socket.on('connect', function(){
-            socket.emit('join', path);
-        });
     };
 
     Endpoint.prototype = Object.create(Eev.prototype);
+
+    Endpoint.prototype.subscribe = function(options) {
+        var options = options || {};
+        this._socket.options = options;
+        this._socket.emit('join', {
+            path: this._socket.path,
+            options: options
+        });
+    }
+
+    Endpoint.prototype.unsubscribe = function() {
+        this._socket.emit('leave', {
+            path: this._socket.path
+        });
+    }
+
+    Endpoint.prototype.all = function(record) {
+        this._socket.emit('all', this._socket.path);
+        return this;
+    }
+
+    Endpoint.prototype.find = function(id) {
+        return this.models.filter(function(model){
+            return model.id == id;
+        }).pop();
+    }
 
     Endpoint.prototype.post = function(record) {
         this._socket.emit('post', {
@@ -214,6 +236,10 @@
             payload: payload
         });
         return this;
+    }
+
+    Endpoint.prototype.close = function() {
+        this._socket.close();
     }
 
     exports.Model = Model;
