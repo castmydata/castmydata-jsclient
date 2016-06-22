@@ -186,12 +186,14 @@
             path: this._socket.path,
             options: options
         });
+        return this;
     }
 
     Endpoint.prototype.unsubscribe = function() {
         this._socket.emit('leave', {
             path: this._socket.path
         });
+        return this;
     }
 
     Endpoint.prototype.all = function(record) {
