@@ -1,6 +1,7 @@
 
 var endpoint = new CastMyData.Endpoint('https://www.castmydata.com', 'testendpoint');
 
+endpoint.subscribe();
 
 // Example 1: Broadcasting
 

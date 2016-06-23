@@ -62,6 +62,7 @@
 
                     list.reg[eev] || (list.reg[eev] = list.insert(fn));
                 });
+                return this;
             },
 
             off: function(names, fn) {
@@ -74,11 +75,13 @@
 
                     list && link && list.remove(link);
                 });
+                return this;
             },
 
             emit: function(name, data) {
                 var evt = this._events[name];
                 evt && evt.head.run(data);
+                return this;
             }
         };
 
@@ -242,6 +245,7 @@
 
     Endpoint.prototype.close = function() {
         this._socket.close();
+        return this;
     }
 
     exports.Model = Model;

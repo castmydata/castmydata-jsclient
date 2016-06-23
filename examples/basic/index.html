@@ -32,7 +32,8 @@
 var endpoint = new CastMyData
     .Endpoint('https://www.castmydata.com',
         'testendpoint');
-        // that's it!
+endpoint.subscribe();
+// that's it!
 </pre>
                 <hr>
                 <h2>Clients</h2>
@@ -74,6 +75,7 @@ var endpoint = new CastMyData
 var endpoint = new CastMyData
     .Endpoint('https://www.castmydata.com',
         'testendpoint');
+endpoint.subscribe();
 
 endpoint.on('broadcast', function(message){
     $('#received').text(message);
@@ -129,9 +131,10 @@ function broadcast() {
                     </li>
                 </ul>
 <pre>
-var endpoint = 
-    NgCastMyDataEndpoint('testendpoint')
-    .bindToScope($scope, 'records');
+var endpoint = new CastMyData
+    .Endpoint('https://www.castmydata.com',
+        'testendpoint');
+endpoint.subscribe();
 
 var editForm = $('#editForm').hide();
 var todoForm = $('#todoForm');
@@ -206,7 +209,7 @@ endpoint.on('post', function(model){
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/master/dist/castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/36cb55dbb44477cbbc8f130cf139c45a370355ba/dist/castmydata.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
