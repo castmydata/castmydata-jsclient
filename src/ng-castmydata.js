@@ -57,6 +57,12 @@
                             $scope.$digest();
                         });
                     });
+                    if(this.models.length > 0) {
+                        angular.extend(datas, this.models);
+                        $timeout(function(){
+                            $scope.$digest();
+                        });
+                    }
 
                     return this;
                 }
