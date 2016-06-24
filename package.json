@@ -1,6 +1,6 @@
 {
   "name": "castmydata-jsclient",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Client for CastMyData",
   "main": "dist/castmydata.min.js",
   "scripts": {
