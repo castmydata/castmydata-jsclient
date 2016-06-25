@@ -613,6 +613,11 @@
         return this;
     }
 
+    Endpoint.prototype.close = function() {
+        this._socket.close('close');
+        return this;
+    }
+
     exports.Model = Model;
     exports.Endpoint = Endpoint;
     exports.Utils = utils;
