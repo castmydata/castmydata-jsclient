@@ -9,6 +9,12 @@
 }(this, function(exports) {
 
     var utils = {};
+    var localStorage;
+
+    if (typeof exports === 'object' && typeof module !== 'undefined') {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+    } 
 
     // https://github.com/k-yak/JJLC/blob/master/scripts/jjlc.dev.js
     (function(root) {
@@ -161,7 +167,7 @@
         root.JJLC = new JJLC();
     }(utils));
     utils.localStorage = utils.JJLC;
-    // utils.localStorage = localStorage;
+    // utils.localStorage = window.localStorage;
 
     // https://github.com/makeable/uuid-v4.js
     (function(scope) {
