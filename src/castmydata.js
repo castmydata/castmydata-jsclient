@@ -158,18 +158,7 @@
                 }
             }
         }
-        if (typeof define !== 'undefined' && define.amd) {
-            // AMD / RequireJS
-            define([], function() {
-                return new JJLC();
-            });
-        } else if (typeof module !== 'undefined' && module.exports) {
-            // Node.js
-            module.exports = new JJLC();
-        } else {
-            // Browser
-            root.JJLC = new JJLC();
-        }
+        root.JJLC = new JJLC();
     }(utils));
     utils.localStorage = utils.JJLC;
     // utils.localStorage = localStorage;
@@ -197,11 +186,7 @@
                 return uuid;
             }
         };
-        if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-            module.exports = uuid;
-        } else {
-            scope.uuid = uuid;
-        }
+        scope.uuid = uuid;
     })(utils);
 
     // https://github.com/chrisdavies/eev
