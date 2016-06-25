@@ -1,12 +1,208 @@
-(function (global, factory) {
-    if(typeof exports === 'object' && typeof module !== 'undefined') {
+(function(global, factory) {
+    if (typeof exports === 'object' && typeof module !== 'undefined') {
         factory(exports);
     } else if (typeof define === 'function' && define.amd) {
         define(['exports'], factory);
     } else {
         factory((global.CastMyData = global.CastMyData || {}));
     }
-}(this, function (exports) { 'use strict';
+}(this, function(exports) {
+
+    var utils = {};
+
+    // https://github.com/k-yak/JJLC/blob/master/scripts/jjlc.dev.js
+    (function(root) {
+        "use strict";
+        var regex = /\"[a-zA-Z0-9]*\":/g,
+            separator = '£',
+            seed = 0xABCD,
+            dicts = {};
+        function _sortedByValue(obj) {
+            var tuples = [],
+                newObj = {},
+                key;
+
+            for (key in obj) {
+                tuples.push([key, obj[key]]);
+            }
+            tuples.sort(function(a, b) {
+                return b[1] - a[1];
+            });
+            for (key in tuples) {
+                newObj[tuples[key][0]] = tuples[key][1];
+            }
+            return newObj;
+        }
+        function _incChar(s) {
+            var c = s[s.length - 1],
+                p = s.substring(0, s.length - 1),
+                nextId;
+
+            if (typeof c === 'undefined') {
+                nextId = 'a';
+            } else if (c === 'z') {
+                nextId = 'A';
+            } else if (c === 'Z') {
+                nextId = 'a';
+                if (p !== '') {
+                    p = _incChar(p);
+                } else {
+                    p = 'a';
+                }
+            } else {
+                nextId = String.fromCharCode(c.charCodeAt(0) + 1);
+            }
+            c = nextId;
+            return p + c;
+        }
+        function _createDict(s) {
+            var dict = {},
+                curId = '',
+                m = s.match(regex),
+                key,
+                sbv;
+
+            for (key in m) {
+                if (m[key].length > (curId.length + 2)) {
+                    if (typeof dict[m[key]] !== 'undefined') {
+                        dict[m[key]] += 1;
+                    } else {
+                        dict[m[key]] = 0;
+                    }
+                }
+            }
+            sbv = _sortedByValue(dict);
+            for (key in sbv) {
+                curId = _incChar(curId);
+                sbv[key] = separator + curId + separator;
+            }
+            return sbv;
+        }
+        function _compress(v, dict) {
+            var id,
+                re;
+            for (id in dict) {
+                re = new RegExp(id, 'g');
+                v = v.replace(re, dict[id]);
+            }
+            return v;
+        }
+        function _decompress(v, dict) {
+            var id,
+                re;
+            for (id in dict) {
+                re = new RegExp(dict[id], 'g');
+                v = v.replace(re, id);
+            }
+            return v;
+        }
+        function JJLC() {
+            this.setItem = function(key, str, ns) {
+                var compressed,
+                    sObject,
+                    dict;
+
+                if (typeof ns === 'undefined' || ns !== 'no-beautify') {
+                    sObject = JSON.parse(str);
+                    str = JSON.stringify(sObject);
+                }
+                dict = _createDict(str);
+                compressed = _compress(str, dict);
+
+                if (typeof ns !== 'undefined' && ns === 'local-dict') {
+                    dicts[key] = dict;
+                } else {
+                    localStorage.setItem(key, compressed);
+                }
+
+                if (typeof dicts[key] === 'undefined') {
+                    localStorage.setItem('d_' + key, JSON.stringify(dict));
+                }
+
+                return compressed;
+            }
+            this.getItem = function(key) {
+                var compressed,
+                    dict;
+
+                compressed = localStorage.getItem(key);
+
+                if (typeof dicts[key] === 'undefined') {
+                    dict = JSON.parse(localStorage.getItem('d_' + key));
+                } else {
+                    dict = dicts[key];
+                }
+                return _decompress(compressed, dict);
+            }
+            this.getDict = function(key) {
+                var compressed,
+                    dict;
+
+                if (typeof dicts[key] === 'undefined') {
+                    dict = JSON.parse(localStorage.getItem('d_' + key));
+                } else {
+                    dict = dicts[key];
+                }
+
+                return dict;
+            }
+            this.setDict = function(key, dic, ns) {
+                var compressed,
+                    h,
+                    dict;
+
+                if (typeof ns === 'undefined') {
+                    localStorage.setItem('d_' + key, dic);
+                } else {
+                    dicts[key] = dic;
+                }
+            }
+        }
+        if (typeof define !== 'undefined' && define.amd) {
+            // AMD / RequireJS
+            define([], function() {
+                return new JJLC();
+            });
+        } else if (typeof module !== 'undefined' && module.exports) {
+            // Node.js
+            module.exports = new JJLC();
+        } else {
+            // Browser
+            root.JJLC = new JJLC();
+        }
+    }(utils));
+    utils.localStorage = utils.JJLC;
+    // utils.localStorage = localStorage;
+
+    // https://github.com/makeable/uuid-v4.js
+    (function(scope) {
+        var dec2hex = [];
+        for (var i = 0; i <= 15; i++) {
+            dec2hex[i] = i.toString(16);
+        }
+        var uuid = {
+            v4: function() {
+                var uuid = '';
+                for (var i = 1; i <= 36; i++) {
+                    if (i === 9 || i === 14 || i === 19 || i === 24) {
+                        uuid += '-';
+                    } else if (i === 15) {
+                        uuid += 4;
+                    } else if (i === 20) {
+                        uuid += dec2hex[(Math.random() * 4 | 0 + 8)];
+                    } else {
+                        uuid += dec2hex[(Math.random() * 15 | 0)];
+                    }
+                }
+                return uuid;
+            }
+        };
+        if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+            module.exports = uuid;
+        } else {
+            scope.uuid = uuid;
+        }
+    })(utils);
 
     // https://github.com/chrisdavies/eev
     var Eev = (function() {
@@ -88,6 +284,20 @@
         return Eev;
     }());
 
+    // http://andrewdupont.net/2009/08/28/deep-extending-objects-in-javascript/
+    Object.deepExtend = function(destination, source) {
+        for (var property in source) {
+            if (source[property] && source[property].constructor &&
+                source[property].constructor === Object) {
+                destination[property] = destination[property] || {};
+                arguments.callee(destination[property], source[property]);
+            } else {
+                destination[property] = source[property];
+            }
+        }
+        return destination;
+    }
+
     var each = function(obj, callback) {
         for (var key in obj) {
             if (obj.hasOwnProperty(key)) {
@@ -96,158 +306,323 @@
         }
     };
 
+
+    /**
+     * Model Start
+     */
+
     var Model = function(point, params) {
-        var params = params || {};
         var that = this;
-
-        each(params, function(val, key) {
-            that[key] = val;
-        });
-
+        params = params || {};
+        this.id = params.id || utils.uuid.v4();
+        this.attributes = params.attributes || {};
+        this.meta = params.meta || {};
         this._events = {};
         this._endpoint = point;
     }
 
     Model.prototype = Object.create(Eev.prototype);
 
-    Model.prototype.delete = function() {
-        this._endpoint.delete(this.id);
-    },
-    Model.prototype.put = function(params) {
-        var params = params || {};
-        var that = this;
-
-        each(params, function(val, key) {
-            that[key] = val;
-        });
-        this._endpoint.put(this.id, params);
+    Model.prototype.get = function() {
+        return JSON.parse(JSON.stringify({
+            id: this.id,
+            attributes: this.attributes,
+            meta: this.meta
+        }));
     }
 
-    var Endpoint = function(CastMyDataServer, path) {
-        var socketioClient = ((typeof io !== 'undefined') ? io : require('socket.io-client'));
-        var socket = this._socket = socketioClient(CastMyDataServer, {
-            multiplex: false
-        });
-        var models = this.models = [];
-        var that = this;
+    Model.prototype.post = function(params) {
+        // update properties
+        params.meta = {
+            synced: false,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            deletedAt: null
+        };
+        Object.deepExtend(this, params);
 
+        // add to endpoint models
+        this._endpoint.models.push(this);
+
+        // save into storage
+        this._endpoint.commit();
+
+        // emit events
+        this.emit('post', this);
+        this._endpoint.emit('post', this);
+
+        // emit socket
+        this._endpoint._socket.emit('post', this.get());
+    }
+
+    Model.prototype.put = function(params) {
+        // update properties
+        Object.deepExtend(this, params);
+        this.meta.synced = false;
+        this.meta.updatedAt = Date.now();
+
+        // save into storage
+        this._endpoint.commit();
+
+        // emit events
+        this.emit('put', this, params);
+        this._endpoint.emit('put', this, params);
+
+        // emit socket
+        this._endpoint._socket.emit('put', this.get());
+    }
+
+    Model.prototype.delete = function() {
+        // update properties
+        this.attributes = {};
+        this.meta.deletedAt = Date.now();
+        this.meta.synced = false;
+
+        // save into storage
+        this._endpoint.commit();
+
+        // emit events
+        this.emit('delete', this);
+        this._endpoint.emit('delete', this);
+
+        // emit socket
+        this._endpoint._socket.emit('delete', this.id);
+    }
+
+    Model.prototype.merge = function(_model) {
+        if (
+            (JSON.stringify(this.attributes) != JSON.stringify(_model.attributes)) ||
+            (JSON.stringify(this.meta) != JSON.stringify(_model.meta))
+        ) {
+            // update properties
+            Object.deepExtend(this, _model);
+
+            // save into storage
+            this._endpoint.commit();
+
+            // emit events
+            this.emit('merge', this);
+            this._endpoint.emit('merge', this);
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Endpoint start
+     */
+
+    var Endpoint = function(CastMyDataServer, path, options) {
+
+        this._options = {};
+        Object.deepExtend(this._options, (options || {}))
+
+        var that = this;
+        var key = 'cmd_' + path;
+
+        if ((/[^a-zA-Z0-9-_\.]/g).test(path)) {
+            throw 'Invalid characters in path. Allowed characters are a-z, A-Z, 0-9, -, _, .';
+        }
+
+        this.models = [];
+        this._socket = [];
         this._events = {};
+        this._subscribed = false;
+
+        // create the socket
+        var socket = this._socket = ((typeof io !== 'undefined') ? io : require('socket.io-client'))
+            (CastMyDataServer + '?path=' + path, {
+                multiplex: false
+            });
         socket.path = path;
 
-        socket.on('records', function(data) {
-            models.splice(0, models.length);
-            var datas = data.forEach(function(model) {
-                model = new Model(that, model);
-                model.emit('post', model);
-                models.push(model);
-            });
-            that.emit('records', models);
-        });
+        // Add incoming listeners
 
-        socket.on('post', function(data) {
-            var model = new Model(that, data.payload);
-            models.push(model);
-            that.emit('post', model);
-        });
-
-        socket.on('put', function(data) {
-            var model = models.filter(function(model) {
-                return model.id == data.id;
-            }).pop();
+        function postHandler(_model) {
+            if (!that._subscribed) return;
+            var model = that.find(_model.id);
             if (model) {
-                each(data.payload, function(val, key) {
-                    model[key] = val;
-                });
-                model.emit('put', data.payload);
-                that.emit('put', model, data.payload);
+                model.merge(_model);
+            } else {
+                // create model
+                model = new Model(that, _model);
+
+                // add to models
+                that.models.push(model);
+
+                // save into storage
+                that.commit();
+
+                // emit events
+                model.emit('post', model);
+                that.emit('post', model);
+            }
+        }
+
+        socket.on('post', postHandler);
+
+        socket.on('sync', function(data) {
+            if (!that._subscribed) return;
+            var datas = data.forEach(function(_model) {
+                postHandler(_model);
+            });
+            that.emit('sync', that.models);
+        });
+
+        socket.on('put', function(record) {
+            if (!that._subscribed) return;
+            var model = that.find(record.id);
+            if (model) {
+                // update model properties
+                Object.deepExtend(model, record);
+
+                // save into storage
+                that.commit();
+
+                // emit events
+                model.emit('merge', model);
+                that.emit('merge', model);
+            } else {
+                postHandler(record);
             }
         });
 
-        socket.on('delete', function(data) {
-            var model = models.filter(function(model) {
-                return model.id == data.id;
-            }).pop();
-            var index = models.indexOf(model);
+        socket.on('delete', function(record) {
+            if (!that._subscribed) return;
+            var model = that.find(record.id);
             if (model) {
-                models.splice(index, 1);
-                model.emit('delete');
+                // update properties
+                Object.deepExtend(model, record);
+
+                // save into storage
+                that.commit();
+
+                // emit events
+                model.emit('merge', model);
+                that.emit('merge', model);
+            }
+            var index = that.models.indexOf(model);
+            if (index > -1) {
+                // save into storage
+                that.commit();
+
+                // emit events
+                model.emit('delete', model);
                 that.emit('delete', model);
             }
         });
 
-        socket.on('broadcast', function(data){
+        socket.on('clear', function() {
+            utils.localStorage.setItem(key, '[]');
+            that.models.splice(0, that.models.length);
+            that.emit('clear');
+        });
+
+        socket.on('broadcast', function(data) {
             that.emit('broadcast', data.payload);
         });
+
+        socket.on('reconnect', function() {
+            console.log('reconnected');
+            if (that._subscribed) {
+                that.subscribe(that._options);
+            }
+        });
+
+        // load data
+        var datas = utils.localStorage.getItem(key);
+        if (datas) {
+            this.models = JSON.parse(datas).map(function(_model) {
+                return new Model(that, _model);
+            });
+            this.emit('load', this.models);
+        }
+
+        // save data
+        this.commit = function() {
+            var models = this.models.map(function(model) {
+                return model.get();
+            });
+            utils.localStorage.setItem(key, JSON.stringify(models));
+        }
     };
 
     Endpoint.prototype = Object.create(Eev.prototype);
 
     Endpoint.prototype.subscribe = function(options) {
-        var options = options || {};
-        this._socket.options = options;
-        this._socket.emit('join', {
-            path: this._socket.path,
-            options: options
-        });
+        this._options = options || {};
+        this._socket.emit('subscribe', this._options);
+        this.emit('subscribed');
+        this._subscribed = true;
+        this.sync();
         return this;
     }
 
     Endpoint.prototype.unsubscribe = function() {
-        this._socket.emit('leave', {
-            path: this._socket.path
-        });
+        this._socket.emit('unsubscribe');
+        this.emit('unsubscribed');
+        this._subscribed = false;
         return this;
     }
 
-    Endpoint.prototype.all = function(record) {
-        this._socket.emit('all', this._socket.path);
+    Endpoint.prototype.sync = function(record) {
+        var unsynced = this.models.filter(function(model) {
+            return !model.meta.synced;
+        }).map(function(model) {
+            return model.get();
+        });
+        this._socket.emit('sync', unsynced);
         return this;
     }
 
     Endpoint.prototype.find = function(id) {
-        return this.models.filter(function(model){
+        return this.models.filter(function(model) {
             return model.id == id;
         }).pop();
     }
 
     Endpoint.prototype.post = function(record) {
-        this._socket.emit('post', {
-            path: this._socket.path,
-            payload: record
+        var model = new Model(this);
+        model.post(record);
+        return this;
+    }
+
+    Endpoint.prototype.create = function(attributes) {
+        this.post({
+            attributes: attributes
         });
         return this;
     }
 
     Endpoint.prototype.put = function(id, record) {
-        this._socket.emit('put', {
-            path: this._socket.path,
-            payload: record,
-            id: id
-        });
+        var model = this.find(id);
+        if (model) {
+            model.put(id, record);
+        }
         return this;
     }
 
     Endpoint.prototype.delete = function(id) {
-        this._socket.emit('delete', {
-            path: this._socket.path,
-            id: id
-        });
+        var model = this.find(id);
+        if (model) {
+            model.delete();
+        }
         return this;
+    }
+
+    Endpoint.prototype.clear = function() {
+        this._socket.emit('clear');
     }
 
     Endpoint.prototype.broadcast = function(payload) {
         this._socket.emit('broadcast', {
-            path: this._socket.path,
             payload: payload
         });
         return this;
     }
 
-    Endpoint.prototype.close = function() {
-        this._socket.close();
-        return this;
-    }
-
     exports.Model = Model;
     exports.Endpoint = Endpoint;
+    exports.Utils = utils;
 }));
