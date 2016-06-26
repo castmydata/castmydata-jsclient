@@ -519,6 +519,10 @@
             }
         });
 
+        socket.on('cmderror', function(error){
+            console.error(error);
+        });
+
         // load data
         var datas = utils.localStorage.getItem(key);
         if (datas) {
