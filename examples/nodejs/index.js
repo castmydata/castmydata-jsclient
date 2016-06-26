@@ -13,17 +13,30 @@ endpoint.on('records', function(records){
 
 // Handle posts
 endpoint.on('post', function(data){
-    console.log(data);
+    console.log('post', data);
+
+    // Update the data
+    endpoint.put(data.id, {
+        attributes: {
+            done: true
+        }
+    });
 });
 
 // Handle updates
 endpoint.on('put', function(data){
-    console.log(data);
+    console.log('put', data);
+
+    // Delete the data
+    endpoint.delete(data.id);
 });
 
 // Handle deletes
 endpoint.on('delete', function(data){
-    console.log(data);
+    console.log('delete', data);
+
+    // Clear the db
+    endpoint.clear();
 });
 
 // Handle broadcasts
@@ -31,20 +44,18 @@ endpoint.on('broadcast', function(message){
     console.log(message);
 });
 
+// Handle clear
+endpoint.on('clear', function(){
+    console.log('cleared!');
+});
+
 // Broadcast some data
 endpoint.broadcast('hey there!');
 
 // Create some data
 endpoint.post({
-    id: 1,
-    title: 'Buy Milk',
-    done: false
+    attributes : {
+        title: 'Buy Milk',
+        done: false
+    }
 });
-
-// Update the data with id 1
-endpoint.put(1, {
-    done: true
-});
-
-// Delete the data with id 1
-endpoint.delete(1);
