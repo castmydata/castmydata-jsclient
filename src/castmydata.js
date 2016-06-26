@@ -14,7 +14,7 @@
     if (typeof exports === 'object' && typeof module !== 'undefined') {
         var LocalStorage = require('node-localstorage').LocalStorage;
         localStorage = new LocalStorage('./scratch');
-    } 
+    }
 
     // https://github.com/k-yak/JJLC/blob/master/scripts/jjlc.dev.js
     (function(root) {
@@ -23,6 +23,7 @@
             separator = '£',
             seed = 0xABCD,
             dicts = {};
+
         function _sortedByValue(obj) {
             var tuples = [],
                 newObj = {},
@@ -39,6 +40,7 @@
             }
             return newObj;
         }
+
         function _incChar(s) {
             var c = s[s.length - 1],
                 p = s.substring(0, s.length - 1),
@@ -61,6 +63,7 @@
             c = nextId;
             return p + c;
         }
+
         function _createDict(s) {
             var dict = {},
                 curId = '',
@@ -84,6 +87,7 @@
             }
             return sbv;
         }
+
         function _compress(v, dict) {
             var id,
                 re;
@@ -93,6 +97,7 @@
             }
             return v;
         }
+
         function _decompress(v, dict) {
             var id,
                 re;
@@ -102,6 +107,7 @@
             }
             return v;
         }
+
         function JJLC() {
             this.setItem = function(key, str, ns) {
                 var compressed,
@@ -515,7 +521,6 @@
         });
 
         socket.on('reconnect', function() {
-            console.log('reconnected');
             if (that._subscribed) {
                 that.subscribe(that._options);
             }
@@ -604,6 +609,7 @@
 
     Endpoint.prototype.clear = function() {
         this._socket.emit('clear');
+        return this;
     }
 
     Endpoint.prototype.broadcast = function(payload) {
