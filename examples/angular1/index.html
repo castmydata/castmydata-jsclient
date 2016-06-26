@@ -6,8 +6,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/36cb55dbb44477cbbc8f130cf139c45a370355ba/dist/castmydata.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/36cb55dbb44477cbbc8f130cf139c45a370355ba/dist/ng-castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/ea595d7b79f85c45ba76a816b5757690f744253d/src/castmydata.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/ea595d7b79f85c45ba76a816b5757690f744253d/src/ng-castmydata.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
     <style>
         .list-group-item {
@@ -81,6 +81,12 @@
                     $scope.name = '';
                 }
 
+                $scope.clear = function() {
+
+                    // clears the database
+                    endpoint.clear();
+                }
+
                 $scope.href = window.location.href;
             });
     </script>
@@ -127,7 +133,7 @@ var endpoint =
                         Last message received: <span ng-bind="received"></span>    
                     </li>
                     <li class="list-group-item animate-repeat">
-                        <form ng-hide="editing.id" ng-submit="broadcast(message)">
+                        <form ng-submit="broadcast(message)">
                             <div class="input-group">
                                 <input type="text" class="form-control" ng-model="message" placeholder="Broadcast">
                                 <span class="input-group-btn">
@@ -161,7 +167,7 @@ endpoint.on('broadcast', function(message){
                 <h3>Example 2: Realtime Database</h3>
                 <p><a href="{{href}}" target="_blank">Open Another Tab</a></p>
                 <ul class="list-group animate-container">
-                    <li ng-repeat="record in records" class="list-group-item animate-repeat">
+                    <li ng-repeat="record in records | filter: {meta: {deletedAt: null}}" class="list-group-item animate-repeat">
                         <div class="btn-group pull-right">
                             <button class="btn btn-danger" ng-click="record.delete()">
                                 <i class="glyphicon glyphicon-remove"></i>
@@ -170,10 +176,10 @@ endpoint.on('broadcast', function(message){
                                 <i class="glyphicon glyphicon-edit"></i>
                             </button>
                         </div>
-                        &nbsp;&nbsp;{{record.name}}
+                        &nbsp;&nbsp;{{record.attributes.name}}
                     </li>
                     <li class="list-group-item animate-repeat">
-                        <form ng-hide="editing.id" ng-submit="post({name: name})">
+                        <form ng-hide="editing.id" ng-submit="post({attributes: {name: name}})">
                             <div class="input-group">
                                 <input type="text" class="form-control" ng-model="name" placeholder="Create New Todo Item">
                                 <span class="input-group-btn">
@@ -183,9 +189,9 @@ endpoint.on('broadcast', function(message){
                                 </span>
                             </div>
                         </form>
-                        <form ng-show="editing.id" ng-submit="editing = editing.put({name: editing.name}) ? '' : ''">
+                        <form ng-show="editing.id" ng-submit="editing = editing.put({name: editing.attributes.name}) ? '' : ''">
                             <div class="input-group">
-                                <input type="text" class="form-control" ng-model="editing.name" placeholder="Edit Todo Item">
+                                <input type="text" class="form-control" ng-model="editing.attributes.name" placeholder="Edit Todo Item">
                                 <span class="input-group-btn">
                                     <button class="btn btn-warning" type="button" ng-click="editing = {}">
                                         <i class="glyphicon glyphicon-floppy-remove"></i>
@@ -197,17 +203,26 @@ endpoint.on('broadcast', function(message){
                             </div>
                         </form>
                     </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-danger btn-sm btn-block" ng-click="clear()">Clear Storage</button>
+                    </li>
                 </ul>
                 <br>
 <pre>
 var endpoint = 
     NgCastMyDataEndpoint('testendpoint')
+    .subscribe()
     .bindToScope($scope, 'records');
 
 $scope.post = function(params) {
     // send the data to the server
     endpoint.post(params);
     $scope.name = '';
+}
+
+$scope.clear = function() {
+    // clears the database
+    endpoint.clear();
 }
 </pre>
             </div>
