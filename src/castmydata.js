@@ -586,10 +586,10 @@
         return this;
     }
 
-    Endpoint.prototype.put = function(id, record) {
-        var model = this.find(id);
+    Endpoint.prototype.put = function(record) {
+        var model = this.find(record.id);
         if (model) {
-            model.put(id, record);
+            model.put(record);
         }
         return this;
     }
