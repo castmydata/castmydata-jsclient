@@ -591,8 +591,8 @@
         return this;
     }
 
-    Endpoint.prototype.put = function(record) {
-        var model = this.find(record.id);
+    Endpoint.prototype.put = function(id, record) {
+        var model = this.find(id);
         if (model) {
             model.put(record);
         }
