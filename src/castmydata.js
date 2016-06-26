@@ -499,15 +499,6 @@
                 model.emit('merge', model);
                 that.emit('merge', model);
             }
-            var index = that.models.indexOf(model);
-            if (index > -1) {
-                // save into storage
-                that.commit();
-
-                // emit events
-                model.emit('delete', model);
-                that.emit('delete', model);
-            }
         });
 
         socket.on('clear', function() {
