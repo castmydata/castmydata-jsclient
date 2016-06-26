@@ -48,6 +48,22 @@
                     return this;
                 }
 
+                CastMyData.Query.prototype.bindToScope = function($scope, param) {
+                    var that = this;
+                    $scope[param] = this.models;
+                    this.on('subscribed unsubscribed sync post put delete clear merge', function() {
+                        $timeout(function() {
+                            $scope.$digest();
+                        });
+                    });
+                    if (this.models.length > 0) {
+                        $timeout(function() {
+                            $scope.$digest();
+                        });
+                    }
+                    return this;
+                }
+
                 return function(path) {
                     if (!endpoints.path) {
                         return new CastMyData.Endpoint(CastMyDataServer, path, options);

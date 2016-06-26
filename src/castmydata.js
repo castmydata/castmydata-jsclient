@@ -618,7 +618,82 @@
         return this;
     }
 
+    /**
+     * Endpoint start
+     */
+
+    var Query = function(endpoint, filter) {
+        this.models = [];
+        this._filter = filter;
+        this._endpoint = endpoint;
+        this._events = {};
+        var that = this;
+        this._endpoint.on('subscribed', function() {
+            that.run.call(that);
+            that.emit('subscribed');
+        });
+        this._endpoint.on('unsubscribed', function() {
+            that.run.call(that);
+            that.emit('unsubscribed');
+        });
+        this._endpoint.on('sync', function() {
+            that.run.call(that);
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift('sync');
+            that.emit.apply(that, args);
+        });
+        this._endpoint.on('post', function() {
+            that.run.call(that);
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift('post');
+            that.emit.apply(that, args);
+        });
+        this._endpoint.on('put', function() {
+            that.run.call(that);
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift('put');
+            that.emit.apply(that, args);
+        });
+        this._endpoint.on('delete', function() {
+            that.run.call(that);
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift('delete');
+            that.emit.apply(that, args);
+        });
+        this._endpoint.on('clear', function() {
+            that.run.call(that);
+            that.emit('clear');
+        });
+        this._endpoint.on('merge', function() {
+            that.run.call(that);
+            that.emit('merge');
+        });
+        this.run.call(that);
+    }
+
+    Query.prototype = Object.create(Eev.prototype);
+
+    Query.prototype.run = function() {
+        this.models = this._endpoint.models.filter(this._filter);
+        return this;
+    }
+
+    Query.prototype.put = function(record) {
+        this.models.forEach(function(model) {
+            model.put(record);
+        });
+        return this;
+    }
+
+    Query.prototype.delete = function() {
+        this.models.forEach(function(model) {
+            model.delete();
+        });
+        return this;
+    }
+
     exports.Model = Model;
+    exports.Query = Query;
     exports.Endpoint = Endpoint;
     exports.Utils = utils;
 }));
