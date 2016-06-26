@@ -569,6 +569,10 @@
         }).pop();
     }
 
+    Endpoint.prototype.where = function(filter) {
+        return new Query(this, filter);
+    }
+
     Endpoint.prototype.post = function(record) {
         var model = new Model(this);
         model.post(record);
