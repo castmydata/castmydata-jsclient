@@ -14,6 +14,8 @@
     if (typeof exports === 'object' && typeof module !== 'undefined') {
         var LocalStorage = require('node-localstorage').LocalStorage;
         localStorage = new LocalStorage('./scratch');
+    } else {
+        localStorage = window.localStorage;
     }
 
     // https://github.com/k-yak/JJLC/blob/master/scripts/jjlc.dev.js
