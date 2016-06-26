@@ -1,6 +1,5 @@
 
 var endpoint = new CastMyData.Endpoint('https://www.castmydata.com', 'testendpoint');
-
 endpoint.subscribe();
 
 // Example 1: Broadcasting
@@ -28,7 +27,7 @@ function startEditing(model) {
     edittingTodo = model;
     editForm.show();
     todoForm.hide();
-    editNameEl.val(model.name);
+    editNameEl.val(model.attributes.name);
 }
 
 function cancelEdit() {
@@ -39,7 +38,9 @@ function cancelEdit() {
 
 function saveEdittingTodo() {
     edittingTodo.put({
-        name: editNameEl.val()
+        attributes: {
+            name: editNameEl.val()
+        }
     });
     editNameEl.val('');
     cancelEdit();
@@ -49,7 +50,9 @@ function saveEdittingTodo() {
 function saveTodo() {
     var nameEl = $('#name');
     endpoint.post({
-        name: nameEl.val()
+        attributes: {
+            name: nameEl.val()
+        }
     });
     nameEl.val('');
     return false;
@@ -57,13 +60,8 @@ function saveTodo() {
 
 function createNewTodo(model) {
     var newTodo = todoTemplate.clone();
-    var nameEl = $('.name', newTodo).text(model.name);
-    model.on('delete', function(){
-        newTodo.remove();
-    });
-    model.on('put', function(){
-        nameEl.text(model.name);
-    });
+    var nameEl = $('.name', newTodo)
+        .text(model.attributes.name);
     $('.delete-btn', newTodo).click(function(){
         model.delete();
     });
@@ -74,10 +72,15 @@ function createNewTodo(model) {
     $('#todo-forms').before(newTodo);
 }
 
-endpoint.on('records', function(models){
-    models.forEach(createNewTodo);
+function clearDb() {
+    endpoint.clear();
+}
+
+var query = endpoint.where(function(model){
+    return model.meta.deletedAt == null;
 });
 
-endpoint.on('post', function(model){
-    createNewTodo(model);
+query.on('sync post put delete clear merge', function(){
+    $('.todo-item').remove();
+    query.models.forEach(createNewTodo);
 });

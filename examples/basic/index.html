@@ -92,8 +92,8 @@ function broadcast() {
             <div class="col-md-4">
                 <h3>Example 2: Realtime Database</h3>
                 <p><a class="link" target="_blank">Open Another Tab</a></p>
-                <ul class="list-group">
-                    <li class="list-group-item todo-template">
+                <ul class="list-group" id="todos">
+                    <li class="list-group-item todo-item todo-template">
                         <div class="btn-group pull-right">
                             <button class="btn btn-danger delete-btn">
                                 <i class="glyphicon glyphicon-remove"></i>
@@ -129,6 +129,9 @@ function broadcast() {
                             </div>
                         </form>
                     </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-danger btn-sm btn-block" onclick="clearDb()">Clear Storage</button>
+                    </li>
                 </ul>
 <pre>
 var endpoint = new CastMyData
@@ -138,8 +141,7 @@ endpoint.subscribe();
 
 var editForm = $('#editForm').hide();
 var todoForm = $('#todoForm');
-var todoTemplate = $('.todo-template')
-    .remove();
+var todoTemplate = $('.todo-template').remove();
 var editNameEl = $('#editName');
 var edittingTodo;
 
@@ -147,7 +149,7 @@ function startEditing(model) {
     edittingTodo = model;
     editForm.show();
     todoForm.hide();
-    editNameEl.val(model.name);
+    editNameEl.val(model.attributes.name);
 }
 
 function cancelEdit() {
@@ -158,7 +160,9 @@ function cancelEdit() {
 
 function saveEdittingTodo() {
     edittingTodo.put({
-        name: editNameEl.val()
+        attributes: {
+            name: editNameEl.val()
+        }
     });
     editNameEl.val('');
     cancelEdit();
@@ -168,7 +172,9 @@ function saveEdittingTodo() {
 function saveTodo() {
     var nameEl = $('#name');
     endpoint.post({
-        name: nameEl.val()
+        attributes: {
+            name: nameEl.val()
+        }
     });
     nameEl.val('');
     return false;
@@ -177,31 +183,28 @@ function saveTodo() {
 function createNewTodo(model) {
     var newTodo = todoTemplate.clone();
     var nameEl = $('.name', newTodo)
-        .text(model.name);
-    model.on('delete', function(){
-        newTodo.remove();
+        .text(model.attributes.name);
+    $('.delete-btn', newTodo).click(function(){
+        model.delete();
     });
-    model.on('put', function(){
-        nameEl.text(model.name);
+    $('.edit-btn', newTodo).click(function(){
+        startEditing(model);
     });
-    $('.delete-btn', newTodo)
-        .click(function(){
-            model.delete();
-        });
-    $('.edit-btn', newTodo)
-        .click(function(){
-            startEditing(model);
-        });
     newTodo.attr('id', model.id);
     $('#todo-forms').before(newTodo);
 }
 
-endpoint.on('records', function(models){
-    models.forEach(createNewTodo);
+function clearDb() {
+    endpoint.clear();
+}
+
+var query = endpoint.where(function(model){
+    return model.meta.deletedAt == null;
 });
 
-endpoint.on('post', function(model){
-    createNewTodo(model);
+query.on('sync post put delete clear merge', function(){
+    $('.todo-item').remove();
+    query.models.forEach(createNewTodo);
 });
 </pre>
             </div>
@@ -209,7 +212,7 @@ endpoint.on('post', function(model){
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/36cb55dbb44477cbbc8f130cf139c45a370355ba/dist/castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/ea595d7b79f85c45ba76a816b5757690f744253d/dist/castmydata.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
