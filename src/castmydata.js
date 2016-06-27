@@ -787,6 +787,16 @@
         }
     };
 
+    var getRecord = function(model) {
+        var record = {}
+        for(var key in model) {
+            if (model.hasOwnProperty(key) && ['$$hashKey', '_endpoint', '_events'].indexOf(key) == -1) {
+                record[key] = model[key];
+            }
+        }
+        return record;
+    }
+
 
     /**
      * Model Start
@@ -795,9 +805,9 @@
     var Model = function(point, params) {
         var that = this;
         params = params || {};
-        this.id = params.id || utils.uuid.v4();
-        this.attributes = params.attributes || {};
-        this.meta = params.meta || {};
+        Object.deepExtend(this, params);
+        this.id = this.id || utils.uuid.v4();
+        this.meta = this.meta || {};
         this._events = {};
         this._endpoint = point;
     }
@@ -805,23 +815,21 @@
     Model.prototype = Object.create(Eev.prototype);
 
     Model.prototype.get = function() {
-        return JSON.parse(JSON.stringify({
-            id: this.id,
-            attributes: this.attributes,
-            meta: this.meta
-        }));
+        return getRecord(this);
     }
 
-    Model.prototype.post = function(params, callback) {
+    Model.prototype.post = function(callback) {
 
         callback && this._endpoint._socket.once('post', callback);
 
         // update properties
-        params.meta = {
-            synced: false,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            deletedAt: null
+        var params = {
+            meta: {
+                synced: false,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                deletedAt: null
+            }
         };
         Object.deepExtend(this, params);
 
@@ -841,7 +849,7 @@
     }
 
     Model.prototype.put = function(params, callback) {
-
+        
         var that = this;
 
         // update properties
@@ -865,8 +873,12 @@
 
         callback && this._endpoint._socket.once('delete', callback);
 
-        // update properties
-        this.attributes = {};
+        // clear properties
+        for(var key in this) {
+            if (this.hasOwnProperty(key) && ['meta', 'id', '_endpoint', '_events'].indexOf(key) == -1) {
+                delete this[key];
+            }
+        }
         this.meta.deletedAt = Date.now();
         this.meta.synced = false;
 
@@ -883,10 +895,7 @@
     }
 
     Model.prototype.merge = function(_model) {
-        if (
-            (JSON.stringify(this.attributes) != JSON.stringify(_model.attributes)) ||
-            (JSON.stringify(this.meta) != JSON.stringify(_model.meta))
-        ) {
+        if (JSON.stringify(getRecord(this)) != JSON.stringify(_model)) {
             // update properties
             Object.deepExtend(this, _model);
 
@@ -1139,16 +1148,15 @@
     }
 
     Endpoint.prototype.post = function(record, callback) {
-        var model = new Model(this);
+        var model = new Model(this, record);
         callback && model.once('receipt:post', callback);
-        model.post(record);
+        model.post();
         return this;
     }
 
-    Endpoint.prototype.create = function(attributes, callback) {
-        this.post({
-            attributes: attributes
-        }, callback);
+    Endpoint.prototype.create = function(params, callback) {
+        var model = new Model(this, params);
+        model.post(callback);
         return this;
     }
 
@@ -1171,7 +1179,7 @@
     }
 
     Endpoint.prototype.clear = function(callback) {
-        callback && this.once('receipt:clear', callback);
+        callback && this._socket.once('receipt:clear', callback);
         this._socket.emit('clear');
         return this;
     }
@@ -1184,7 +1192,8 @@
         return this;
     }
 
-    Endpoint.prototype.close = function() {
+    Endpoint.prototype.close = function(callback) {
+        callback && this._socket.once('close', callback);
         this._socket.close('close');
         return this;
     }
