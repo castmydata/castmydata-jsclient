@@ -18,15 +18,7 @@
         localStorage = window.localStorage;
     }
 
-    /*
-     * Sift 3.x
-     *
-     * Copryright 2015, Craig Condon
-     * Licensed under MIT
-     *
-     * Filter JavaScript objects with mongodb queries
-     */
-
+    // https://github.com/crcn/sift.js/tree/master
     (function(utils) {
 
         'use strict';
@@ -693,7 +685,6 @@
         root.JJLC = new JJLC();
     }(utils));
     utils.localStorage = utils.JJLC;
-    // utils.localStorage = window.localStorage;
 
     // https://github.com/makeable/uuid-v4.js
     (function(scope) {
@@ -721,86 +712,6 @@
         scope.uuid = uuid;
     })(utils);
 
-    // https://github.com/chrisdavies/eev
-    var Eev = (function() {
-        var id = 0;
-
-        // A relatively generic LinkedList impl
-        function LinkedList(linkConstructor) {
-            this.head = new RunnableLink();
-            this.tail = new RunnableLink(this.head);
-            this.head.next = this.tail;
-            this.linkConstructor = linkConstructor;
-            this.reg = {};
-        }
-
-        LinkedList.prototype = {
-            insert: function(data) {
-                var link = new RunnableLink(this.tail.prev, this.tail, data);
-                link.next.prev = link.prev.next = link;
-                return link;
-            },
-
-            remove: function(link) {
-                link.prev.next = link.next;
-                link.next.prev = link.prev;
-            }
-        };
-
-        // A link in the linked list which allows
-        // for efficient execution of the callbacks
-        function RunnableLink(prev, next, fn) {
-            this.prev = prev;
-            this.next = next;
-            this.fn = fn || noop;
-        }
-
-        RunnableLink.prototype.run = function(data) {
-            this.fn(data);
-            this.next && this.next.run(data);
-        };
-
-        function noop() {}
-
-        function Eev() {
-            this._events = {};
-        }
-
-        Eev.prototype = {
-            on: function(names, fn) {
-                var me = this;
-                names.split(/\W+/g).forEach(function(name) {
-                    var list = me._events[name] || (me._events[name] = new LinkedList());
-                    var eev = fn._eev || (fn._eev = (++id));
-
-                    list.reg[eev] || (list.reg[eev] = list.insert(fn));
-                });
-                return this;
-            },
-
-            off: function(names, fn) {
-                var me = this;
-                names.split(/\W+/g).forEach(function(name) {
-                    var list = me._events[name];
-                    var link = list.reg[fn._eev];
-
-                    list.reg[fn._eev] = undefined;
-
-                    list && link && list.remove(link);
-                });
-                return this;
-            },
-
-            emit: function(name, data) {
-                var evt = this._events[name];
-                evt && evt.head.run(data);
-                return this;
-            }
-        };
-
-        return Eev;
-    }());
-
     // http://andrewdupont.net/2009/08/28/deep-extending-objects-in-javascript/
     Object.deepExtend = function(destination, source) {
         for (var property in source) {
@@ -814,6 +725,59 @@
         }
         return destination;
     }
+
+    function Eev() {
+        this._events = {};
+    }
+    Eev.prototype = {
+        on: function(names, fn) {
+            var me = this;
+            names.split(/\s+/g).forEach(function(name) {
+                var list = me._events[name] || (me._events[name] = []);
+                me._events[name].push(fn);
+            });
+            return this;
+        },
+
+        off: function(names, fn) {
+            var me = this;
+            names.split(/\s+/g).forEach(function(name) {
+                var list = me._events[name];
+                if(list) {
+                    me._events[name] = me._events[name].filter(function(fn){
+                        return fn !== fn;
+                    });
+                }
+            });
+            return this;
+        },
+
+        once: function(names, fn) {
+            var me = this;
+            names.split(/\s+/g).forEach(function(name) {
+                var list = me._events[name] || (me._events[name] = []);
+                fn._callOnce = true;
+                me._events[name].push(fn);
+            });
+            return this;
+        },
+
+        emit: function(name, data, context) {
+            var me = this;
+            context = context || this;
+            var evt = this._events[name] || (this._events[name] = []);
+            evt.forEach(function(fn){
+                if(fn._callOnce) {
+                    delete fn._callOnce;
+                    fn.call(context, data);
+                    me.off(name, fn);
+                    return me;
+                }
+                fn.call(context, data);
+            });
+            return this;
+        }
+    };
 
     var each = function(obj, callback) {
         for (var key in obj) {
@@ -848,7 +812,10 @@
         }));
     }
 
-    Model.prototype.post = function(params) {
+    Model.prototype.post = function(params, callback) {
+
+        callback && this._endpoint._socket.once('post', callback);
+
         // update properties
         params.meta = {
             synced: false,
@@ -870,9 +837,13 @@
 
         // emit socket
         this._endpoint._socket.emit('post', this.get());
+        return this;
     }
 
-    Model.prototype.put = function(params) {
+    Model.prototype.put = function(params, callback) {
+
+        var that = this;
+
         // update properties
         Object.deepExtend(this, params);
         this.meta.synced = false;
@@ -887,9 +858,13 @@
 
         // emit socket
         this._endpoint._socket.emit('put', this.get());
+        return this;
     }
 
-    Model.prototype.delete = function() {
+    Model.prototype.delete = function(callback) {
+
+        callback && this._endpoint._socket.once('delete', callback);
+
         // update properties
         this.attributes = {};
         this.meta.deletedAt = Date.now();
@@ -904,6 +879,7 @@
 
         // emit socket
         this._endpoint._socket.emit('delete', this.id);
+        return this;
     }
 
     Model.prototype.merge = function(_model) {
@@ -920,10 +896,8 @@
             // emit events
             this.emit('merge', this);
             this._endpoint.emit('merge', this);
-
-            return true;
         }
-        return false;
+        return this;
     }
 
     /**
@@ -955,13 +929,23 @@
             });
         socket.path = path;
 
-        // Add incoming listeners
+        // Add handlers
+        function syncHandler (data, callback) {
+            if (!that._subscribed) return;
+            var datas = data.forEach(function(_model) {
+                postHandler(_model);
+            });
+            that.emit('sync', that.models);
+            callback && callback();
+        }
 
-        function postHandler(_model) {
+        function postHandler(_model, callback) {
             if (!that._subscribed) return;
             var model = that.find(_model.id);
             if (model) {
                 model.merge(_model);
+                model.emit('merge', model);
+                that.emit('merge', model);
             } else {
                 // create model
                 model = new Model(that, _model);
@@ -971,24 +955,14 @@
 
                 // save into storage
                 that.commit();
-
-                // emit events
-                model.emit('post', model);
-                that.emit('post', model);
             }
+            // emit events
+            model.emit('post', model);
+            that.emit('post', model);
+            callback && callback(model);
         }
 
-        socket.on('post', postHandler);
-
-        socket.on('sync', function(data) {
-            if (!that._subscribed) return;
-            var datas = data.forEach(function(_model) {
-                postHandler(_model);
-            });
-            that.emit('sync', that.models);
-        });
-
-        socket.on('put', function(record) {
+        function putHandler (record, callback) {
             if (!that._subscribed) return;
             var model = that.find(record.id);
             if (model) {
@@ -1002,11 +976,15 @@
                 model.emit('merge', model);
                 that.emit('merge', model);
             } else {
-                postHandler(record);
+                model = new Model(that, record);
+                that.models.push(model);
+                that.commit();
             }
-        });
+            model.emit('put');
+            callback && callback(model);
+        }
 
-        socket.on('delete', function(record) {
+        function deleteHandler(record, callback) {
             if (!that._subscribed) return;
             var model = that.find(record.id);
             if (model) {
@@ -1019,35 +997,81 @@
                 // emit events
                 model.emit('merge', model);
                 that.emit('merge', model);
+                callback && callback(model);
             }
-        });
+        }
 
-        socket.on('clear', function() {
+        function clearHandler (callback) {
             utils.localStorage.setItem(key, '[]');
             that.models.splice(0, that.models.length);
             that.emit('clear');
-        });
+            callback && callback();
+        }
 
-        socket.on('broadcast', function(data) {
+        function broadcastHandler (data, callback) {
             that.emit('broadcast', data.payload);
-        });
+            callback && callback(data.payload);
+        }
 
-        socket.on('reconnect', function() {
+        function reconnectHandler () {
             if (that._subscribed) {
                 that.subscribe(that._options);
             }
-        });
+        }
 
-        socket.on('cmderror', function(error) {
+        function serverErrorHandler (error) {
             console.error(error);
+        }
+
+        // handle events from other clients
+        socket.on('sync', syncHandler);
+        socket.on('post', postHandler);
+        socket.on('put', putHandler);
+        socket.on('delete', deleteHandler);
+        socket.on('clear', clearHandler);
+        socket.on('broadcast', broadcastHandler);
+        socket.on('reconnect', reconnectHandler);
+        socket.on('cmderror', serverErrorHandler);
+
+        // handle receipts
+        socket.on('sync', function(records){
+            syncHandler(records, function(model){
+                that.emit('receipt:sync');
+            });
+        });
+        socket.on('receipt:post', function(record){
+            postHandler(record, function(model){
+                model.emit('receipt:post', model);
+            });
+        });
+        socket.on('receipt:put', function(data){
+            putHandler(data, function(model){
+                model.emit('receipt:put', model);
+            });
+        });
+        socket.on('receipt:delete', function(record){
+            deleteHandler(record, function(model){
+                model.emit('receipt:delete', model);
+            });
+        });
+        socket.on('receipt:clear', function(){
+            clearHandler(function(){
+                that.emit('receipt:clear');
+            });
+        });
+        socket.on('receipt:broadcast', function(data){
+            broadcastHandler(data, function(data){
+                that.emit('receipt:broadcast', data);
+            })
         });
     };
 
     Endpoint.prototype = Object.create(Eev.prototype);
 
-    Endpoint.prototype.load = function() {
+    Endpoint.prototype.load = function(callback) {
         var that = this;
         var datas = utils.localStorage.getItem(this._key);
+        callback && this.once('load', callback, this);
         if (datas) {
             var models = JSON.parse(datas).map(function(_model) {
                 return new Model(that, _model);
@@ -1058,31 +1082,43 @@
             models.unshift(0);
             models.unshift(this.models.length);
             this.models.splice.apply(this.models, models);
-            this.emit('load', this.models);
         }
+        this.emit('load', this.models);
     }
 
-    Endpoint.prototype.commit = function() {
+    Endpoint.prototype.commit = function(callback) {
+        callback && this.once('commit', callback);
         var models = this.models.map(function(model) {
             return model.get();
         });
         utils.localStorage.setItem(this._key, JSON.stringify(models));
+        this.emit('commit');
     }
 
-    Endpoint.prototype.subscribe = function(options) {
-        this._options = options || {};
-        this._filter = this._options.filter;
-        if (this._subscribed) {
-            this.unsubscribe();
+    Endpoint.prototype.subscribe = function(options, callback) {
+        if(typeof options == 'function') {
+            callback = options;
+            options = {};
         }
-        this._socket.emit('subscribe', this._options);
-        this.emit('subscribed');
-        this._subscribed = true;
-        this.sync();
+        var that = this;
+        function sub() {
+            that._options = options || {};
+            that._filter = that._options.filter;
+            that._socket.emit('subscribe', that._options);
+            that.emit('subscribed');
+            that._subscribed = true;
+            that.sync(callback);
+        }
+        if (this._subscribed) {
+            this.unsubscribe(sub);
+        } else {
+            sub();
+        }
         return this;
     }
 
-    Endpoint.prototype.unsubscribe = function() {
+    Endpoint.prototype.unsubscribe = function(callback) {
+        callback && this._socket.once('unsubscribe', callback);
         this.models.splice(0, this.models.length);
         this._socket.emit('unsubscribe');
         this.emit('unsubscribed');
@@ -1090,62 +1126,58 @@
         return this;
     }
 
-    Endpoint.prototype.sync = function(record) {
+    Endpoint.prototype.sync = function(callback) {
         this.load();
         var unsynced = this.models.filter(function(model) {
             return !model.meta.synced;
         }).map(function(model) {
             return model.get();
         });
+        callback && this.once('receipt:sync', callback);
         this._socket.emit('sync', unsynced);
         return this;
     }
 
-    Endpoint.prototype.find = function(id) {
-        return this.models.filter(function(model) {
-            return model.id == id;
-        }).pop();
-    }
-
-    Endpoint.prototype.where = function(filter) {
-        return new Query(this, filter);
-    }
-
-    Endpoint.prototype.post = function(record) {
+    Endpoint.prototype.post = function(record, callback) {
         var model = new Model(this);
+        callback && model.once('receipt:post', callback);
         model.post(record);
         return this;
     }
 
-    Endpoint.prototype.create = function(attributes) {
+    Endpoint.prototype.create = function(attributes, callback) {
         this.post({
             attributes: attributes
-        });
+        }, callback);
         return this;
     }
 
-    Endpoint.prototype.put = function(id, record) {
+    Endpoint.prototype.put = function(id, record, callback) {
         var model = this.find(id);
         if (model) {
+            callback && model.once('receipt:put', callback);
             model.put(record);
         }
         return this;
     }
 
-    Endpoint.prototype.delete = function(id) {
+    Endpoint.prototype.delete = function(id, callback) {
         var model = this.find(id);
         if (model) {
+            callback && model.once('receipt:delete', callback);
             model.delete();
         }
         return this;
     }
 
-    Endpoint.prototype.clear = function() {
+    Endpoint.prototype.clear = function(callback) {
+        callback && this.once('receipt:clear', callback);
         this._socket.emit('clear');
         return this;
     }
 
-    Endpoint.prototype.broadcast = function(payload) {
+    Endpoint.prototype.broadcast = function(payload, callback) {
+        callback && this.once('receipt:broadcast', callback);
         this._socket.emit('broadcast', {
             payload: payload
         });
@@ -1155,6 +1187,17 @@
     Endpoint.prototype.close = function() {
         this._socket.close('close');
         return this;
+    }
+
+    // Queries
+    Endpoint.prototype.find = function(id) {
+        return this.models.filter(function(model) {
+            return model.id == id;
+        }).pop();
+    }
+
+    Endpoint.prototype.where = function(filter) {
+        return new Query(this, filter);
     }
 
     /**
@@ -1168,43 +1211,35 @@
         this._events = {};
         var that = this;
         this._endpoint.on('subscribed', function() {
-            that.run.call(that);
+            that.run();
             that.emit('subscribed');
         });
         this._endpoint.on('unsubscribed', function() {
-            that.run.call(that);
+            that.run();
             that.emit('unsubscribed');
         });
-        this._endpoint.on('sync', function() {
-            that.run.call(that);
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift('sync');
-            that.emit.apply(that, args);
+        this._endpoint.on('sync', function(models) {
+            that.run();
+            that.emit('sync', models);
         });
-        this._endpoint.on('post', function() {
-            that.run.call(that);
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift('post');
-            that.emit.apply(that, args);
+        this._endpoint.on('post', function(model) {
+            that.run();
+            that.emit('post', model);
         });
-        this._endpoint.on('put', function() {
-            that.run.call(that);
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift('put');
-            that.emit.apply(that, args);
+        this._endpoint.on('put', function(model) {
+            that.run();
+            that.emit('put', model);
         });
-        this._endpoint.on('delete', function() {
-            that.run.call(that);
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift('delete');
-            that.emit.apply(that, args);
+        this._endpoint.on('delete', function(model) {
+            that.run();
+            that.emit('put', model);
         });
         this._endpoint.on('clear', function() {
-            that.run.call(that);
+            that.run();
             that.emit('clear');
         });
         this._endpoint.on('merge', function() {
-            that.run.call(that);
+            that.run();
             that.emit('merge');
         });
         this.run.call(that);
