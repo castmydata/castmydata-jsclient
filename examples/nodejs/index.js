@@ -17,9 +17,7 @@ endpoint.on('post', function(data){
 
     // Update the data
     endpoint.put(data.id, {
-        attributes: {
-            done: true
-        }
+        done: true
     });
 });
 
@@ -54,8 +52,6 @@ endpoint.broadcast('hey there!');
 
 // Create some data
 endpoint.post({
-    attributes : {
-        title: 'Buy Milk',
-        done: false
-    }
+    title: 'Buy Milk',
+    done: false
 });

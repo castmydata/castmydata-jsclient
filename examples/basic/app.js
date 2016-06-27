@@ -27,7 +27,7 @@ function startEditing(model) {
     edittingTodo = model;
     editForm.show();
     todoForm.hide();
-    editNameEl.val(model.attributes.name);
+    editNameEl.val(model.name);
 }
 
 function cancelEdit() {
@@ -38,9 +38,7 @@ function cancelEdit() {
 
 function saveEdittingTodo() {
     edittingTodo.put({
-        attributes: {
-            name: editNameEl.val()
-        }
+        name: editNameEl.val()
     });
     editNameEl.val('');
     cancelEdit();
@@ -50,9 +48,7 @@ function saveEdittingTodo() {
 function saveTodo() {
     var nameEl = $('#name');
     endpoint.post({
-        attributes: {
-            name: nameEl.val()
-        }
+        name: nameEl.val()
     });
     nameEl.val('');
     return false;
@@ -61,7 +57,7 @@ function saveTodo() {
 function createNewTodo(model) {
     var newTodo = todoTemplate.clone();
     var nameEl = $('.name', newTodo)
-        .text(model.attributes.name);
+        .text(model.name);
     $('.delete-btn', newTodo).click(function(){
         model.delete();
     });

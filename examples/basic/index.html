@@ -52,7 +52,7 @@ endpoint.subscribe();
             </div>
             <div class="col-md-4">
                 <h3>Example 1: Broadcasting</h3>
-                <p><a class="link" target="_blank">Open Another Tab</a></p>
+                <p><a href="/" target="_blank">Open Another Tab</a></p>
                 <ul class="list-group">
                     <li class="list-group-item">
                         Last message received: <span id="received"></span>    
@@ -91,7 +91,7 @@ function broadcast() {
             </div>
             <div class="col-md-4">
                 <h3>Example 2: Realtime Database</h3>
-                <p><a class="link" target="_blank">Open Another Tab</a></p>
+                <p><a href="/" target="_blank">Open Another Tab</a></p>
                 <ul class="list-group" id="todos">
                     <li class="list-group-item todo-item todo-template">
                         <div class="btn-group pull-right">
@@ -149,7 +149,7 @@ function startEditing(model) {
     edittingTodo = model;
     editForm.show();
     todoForm.hide();
-    editNameEl.val(model.attributes.name);
+    editNameEl.val(model.name);
 }
 
 function cancelEdit() {
@@ -160,9 +160,7 @@ function cancelEdit() {
 
 function saveEdittingTodo() {
     edittingTodo.put({
-        attributes: {
-            name: editNameEl.val()
-        }
+        name: editNameEl.val()
     });
     editNameEl.val('');
     cancelEdit();
@@ -172,9 +170,7 @@ function saveEdittingTodo() {
 function saveTodo() {
     var nameEl = $('#name');
     endpoint.post({
-        attributes: {
-            name: nameEl.val()
-        }
+        name: nameEl.val()
     });
     nameEl.val('');
     return false;
@@ -183,7 +179,7 @@ function saveTodo() {
 function createNewTodo(model) {
     var newTodo = todoTemplate.clone();
     var nameEl = $('.name', newTodo)
-        .text(model.attributes.name);
+        .text(model.name);
     $('.delete-btn', newTodo).click(function(){
         model.delete();
     });
@@ -212,7 +208,7 @@ query.on('sync post put delete clear merge', function(){
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/ea595d7b79f85c45ba76a816b5757690f744253d/dist/castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v3.2.0/dist/castmydata.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

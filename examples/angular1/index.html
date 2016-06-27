@@ -6,8 +6,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/ea595d7b79f85c45ba76a816b5757690f744253d/src/castmydata.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/ea595d7b79f85c45ba76a816b5757690f744253d/src/ng-castmydata.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v3.2.0/src/castmydata.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v3.2.0/src/ng-castmydata.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
     <style>
         .list-group-item {
@@ -75,7 +75,7 @@
                 $scope.post = function(params) {
 
                     // send the data to the server
-                    endpoint.post(params);
+                    endpoint.create(params);
 
                     // clear the name variable
                     $scope.name = '';
@@ -176,10 +176,10 @@ endpoint.on('broadcast', function(message){
                                 <i class="glyphicon glyphicon-edit"></i>
                             </button>
                         </div>
-                        &nbsp;&nbsp;{{record.attributes.name}}
+                        &nbsp;&nbsp;{{record.name}}
                     </li>
                     <li class="list-group-item animate-repeat">
-                        <form ng-hide="editing.id" ng-submit="post({attributes: {name: name}})">
+                        <form ng-hide="editing.id" ng-submit="post({name: name})">
                             <div class="input-group">
                                 <input type="text" class="form-control" ng-model="name" placeholder="Create New Todo Item">
                                 <span class="input-group-btn">
@@ -189,9 +189,9 @@ endpoint.on('broadcast', function(message){
                                 </span>
                             </div>
                         </form>
-                        <form ng-show="editing.id" ng-submit="editing = editing.put({name: editing.attributes.name}) ? '' : ''">
+                        <form ng-show="editing.id" ng-submit="editing = editing.put({name: editing.name}) ? '' : ''">
                             <div class="input-group">
-                                <input type="text" class="form-control" ng-model="editing.attributes.name" placeholder="Edit Todo Item">
+                                <input type="text" class="form-control" ng-model="editing.name" placeholder="Edit Todo Item">
                                 <span class="input-group-btn">
                                     <button class="btn btn-warning" type="button" ng-click="editing = {}">
                                         <i class="glyphicon glyphicon-floppy-remove"></i>
@@ -216,7 +216,7 @@ var endpoint =
 
 $scope.post = function(params) {
     // send the data to the server
-    endpoint.post(params);
+    endpoint.create(params);
     $scope.name = '';
 }
 
