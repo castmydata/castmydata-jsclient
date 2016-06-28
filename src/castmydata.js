@@ -998,7 +998,18 @@
             var model = that.find(record.id);
             if (model) {
                 // update properties
-                Object.deepExtend(model, record);
+
+                for(var key in model) {
+                    if (model.hasOwnProperty(key) && [
+                        'id',
+                        'meta',
+                        '$$hashKey',
+                        '_endpoint',
+                        '_events'
+                    ].indexOf(key) == -1) {
+                        delete model[key];
+                    }
+                }
 
                 // save into storage
                 that.commit();
