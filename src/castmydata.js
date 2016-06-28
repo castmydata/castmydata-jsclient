@@ -1011,6 +1011,9 @@
                     }
                 }
 
+                // extend response meta
+                Object.deepExtend(model.meta, record.meta);
+
                 // save into storage
                 that.commit();
 
