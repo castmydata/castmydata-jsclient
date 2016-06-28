@@ -24,11 +24,6 @@
                             $scope.$digest();
                         });
                     });
-                    if (this.models.length > 0) {
-                        $timeout(function() {
-                            $scope.$digest();
-                        });
-                    }
                     return this;
                 }
 
