@@ -1,22 +1,15 @@
-(function() {
+// jshint quotmark:single, bitwise:false, forin:false
+// globals io:true define:true
 
+(function() {
+        'use strict';
+  
     angular.module('NgCastMyData', [])
         .value('CastMyDataServer', '')
         .factory('NgCastMyDataEndpoint', ['CastMyDataServer', '$timeout',
             function(CastMyDataServer, $timeout, options) {
-
                 options = options || {};
-
-                var each = function(obj, callback) {
-                    for (var key in obj) {
-                        if (obj.hasOwnProperty(key)) {
-                            callback(obj[key], key);
-                        }
-                    }
-                };
-
                 var endpoints = {};
-
                 CastMyData.Model.prototype.bindToScope = function($scope, param) {
                     $scope[param] = this;
                     this.on('sync post put delete merge', function() {
@@ -25,10 +18,9 @@
                         });
                     });
                     return this;
-                }
+                };
 
                 CastMyData.Endpoint.prototype.bindToScope = function($scope, param) {
-                    var that = this;
                     $scope[param] = this.models;
                     this.on('subscribed unsubscribed sync post put delete clear merge broadcast', function() {
                         $timeout(function() {
@@ -41,10 +33,9 @@
                         });
                     }
                     return this;
-                }
+                };
 
                 CastMyData.Query.prototype.bindToScope = function($scope, param) {
-                    var that = this;
                     $scope[param] = this.models;
                     this.on('subscribed unsubscribed sync post put delete clear merge', function() {
                         $timeout(function() {
@@ -57,13 +48,13 @@
                         });
                     }
                     return this;
-                }
+                };
 
                 return function(path) {
                     if (!endpoints.path) {
                         return new CastMyData.Endpoint(CastMyDataServer, path, options);
                     }
-                    return endpoints.path;;
+                    return endpoints.path;
                 };
             }
         ]);

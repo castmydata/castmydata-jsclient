@@ -1,4 +1,9 @@
+// jshint quotmark:single, bitwise:false, forin:false
+// globals io:true define:true
+
 (function(global, factory) {
+    'use strict';
+  
     if (typeof exports === 'object' && typeof module !== 'undefined') {
         factory(exports);
     } else if (typeof define === 'function' && define.amd) {
@@ -7,6 +12,7 @@
         factory((global.CastMyData = global.CastMyData || {}));
     }
 }(this, function(exports) {
+        'use strict';
 
     var utils = {};
     var localStorage;
@@ -21,7 +27,6 @@
     // https://github.com/crcn/sift.js/tree/master
     (function(utils) {
 
-        'use strict';
 
         /**
          */
@@ -64,7 +69,7 @@
                 for (var i = 0, n = b.length; i < n; i++)
                     if (validator(a, get(b, i))) return true;
                 return false;
-            }
+            };
         }
 
         /**
@@ -272,8 +277,8 @@
                 } else if (a === null) {
                     return function(b) {
                         //will match both null and undefined
-                        return b == null;
-                    }
+                        return (b === null || b === undefined);
+                    };
                 }
 
                 return function(b) {
@@ -327,7 +332,7 @@
              */
 
             $where: function(a) {
-                return typeof a === 'string' ? new Function('obj', 'return ' + a) : a;
+                return a;
             },
 
             /**
@@ -530,10 +535,8 @@
 
     // https://github.com/k-yak/JJLC/blob/master/scripts/jjlc.dev.js
     (function(root) {
-        "use strict";
         var regex = /\"[a-zA-Z0-9]*\":/g,
             separator = '£',
-            seed = 0xABCD,
             dicts = {};
 
         function _sortedByValue(obj) {
@@ -644,7 +647,7 @@
                 }
 
                 return compressed;
-            }
+            };
             this.getItem = function(key) {
                 var compressed,
                     dict;
@@ -657,10 +660,9 @@
                     dict = dicts[key];
                 }
                 return _decompress(compressed, dict);
-            }
+            };
             this.getDict = function(key) {
-                var compressed,
-                    dict;
+                var dict;
 
                 if (typeof dicts[key] === 'undefined') {
                     dict = JSON.parse(localStorage.getItem('d_' + key));
@@ -669,18 +671,14 @@
                 }
 
                 return dict;
-            }
+            };
             this.setDict = function(key, dic, ns) {
-                var compressed,
-                    h,
-                    dict;
-
                 if (typeof ns === 'undefined') {
                     localStorage.setItem('d_' + key, dic);
                 } else {
                     dicts[key] = dic;
                 }
-            }
+            };
         }
         root.JJLC = new JJLC();
     }(utils));
@@ -713,18 +711,18 @@
     })(utils);
 
     // http://andrewdupont.net/2009/08/28/deep-extending-objects-in-javascript/
-    Object.deepExtend = function(destination, source) {
+    Object.deepExtend = function deepExtend (destination, source) {
         for (var property in source) {
             if (source[property] && source[property].constructor &&
                 source[property].constructor === Object) {
                 destination[property] = destination[property] || {};
-                arguments.callee(destination[property], source[property]);
+                                deepExtend(destination[property], source[property]);
             } else {
                 destination[property] = source[property];
             }
         }
         return destination;
-    }
+    };
 
     function Eev() {
         this._events = {};
@@ -733,7 +731,7 @@
         on: function(names, fn) {
             var me = this;
             names.split(/\s+/g).forEach(function(name) {
-                var list = me._events[name] || (me._events[name] = []);
+                                if(!me._events[name]) me._events[name] = [];
                 me._events[name].push(fn);
             });
             return this;
@@ -755,7 +753,7 @@
         once: function(names, fn) {
             var me = this;
             names.split(/\s+/g).forEach(function(name) {
-                var list = me._events[name] || (me._events[name] = []);
+                                if(!me._events[name]) me._events[name] = [];
                 fn._callOnce = true;
                 me._events[name].push(fn);
             });
@@ -779,23 +777,16 @@
         }
     };
 
-    var each = function(obj, callback) {
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                callback(obj[key], key);
-            }
-        }
-    };
 
     var getRecord = function(model) {
-        var record = {}
+        var record = {};
         for(var key in model) {
             if (model.hasOwnProperty(key) && ['$$hashKey', '_endpoint', '_events'].indexOf(key) == -1) {
                 record[key] = model[key];
             }
         }
         return record;
-    }
+    };
 
 
     /**
@@ -803,24 +794,23 @@
      */
 
     var Model = function(point, params) {
-        var that = this;
         params = params || {};
         Object.deepExtend(this, params);
         this.id = this.id || utils.uuid.v4();
         this.meta = this.meta || {};
         this._events = {};
         this._endpoint = point;
-    }
+    };
 
     Model.prototype = Object.create(Eev.prototype);
 
     Model.prototype.get = function() {
         return getRecord(this);
-    }
+    };
 
     Model.prototype.post = function(callback) {
 
-        callback && this._endpoint._socket.once('post', callback);
+        if (callback) this._endpoint._socket.once('post', callback);
 
         // update properties
         var params = {
@@ -846,12 +836,10 @@
         // emit socket
         this._endpoint._socket.emit('post', this.get());
         return this;
-    }
+    };
 
     Model.prototype.put = function(params, callback) {
-        
-        var that = this;
-
+      
         // update properties
         Object.deepExtend(this, params);
         this.meta.synced = false;
@@ -867,11 +855,11 @@
         // emit socket
         this._endpoint._socket.emit('put', this.get());
         return this;
-    }
+    };
 
     Model.prototype.delete = function(callback) {
 
-        callback && this._endpoint._socket.once('delete', callback);
+        if(callback) this._endpoint._socket.once('delete', callback);
 
         // clear properties
         for(var key in this) {
@@ -892,7 +880,7 @@
         // emit socket
         this._endpoint._socket.emit('delete', this.id);
         return this;
-    }
+    };
 
     Model.prototype.merge = function(_model) {
         if (JSON.stringify(getRecord(this)) != JSON.stringify(_model)) {
@@ -907,7 +895,7 @@
             this._endpoint.emit('merge', this);
         }
         return this;
-    }
+    };
 
     /**
      * Endpoint start
@@ -916,7 +904,7 @@
     var Endpoint = function(CastMyDataServer, path, options) {
 
         this._options = {};
-        Object.deepExtend(this._options, (options || {}))
+        Object.deepExtend(this._options, (options || {}));
 
         var that = this;
         var key = this._key = 'cmd_' + path;
@@ -928,7 +916,7 @@
         this.models = [];
         this._socket = [];
         this._events = {};
-        this._filter;
+        this._filter = null;
         this._subscribed = false;
 
         // create the socket
@@ -941,11 +929,11 @@
         // Add handlers
         function syncHandler (data, callback) {
             if (!that._subscribed) return;
-            var datas = data.forEach(function(_model) {
+                        data.forEach(function(_model) {
                 postHandler(_model);
             });
             that.emit('sync', that.models);
-            callback && callback();
+            if(callback) callback();
         }
 
         function postHandler(_model, callback) {
@@ -968,7 +956,7 @@
             // emit events
             model.emit('post', model);
             that.emit('post', model);
-            callback && callback(model);
+            if(callback) callback(model);
         }
 
         function putHandler (record, callback) {
@@ -990,7 +978,7 @@
                 that.commit();
             }
             model.emit('put');
-            callback && callback(model);
+            if(callback) callback(model);
         }
 
         function deleteHandler(record, callback) {
@@ -1020,7 +1008,7 @@
                 // emit events
                 model.emit('merge', model);
                 that.emit('merge', model);
-                callback && callback(model);
+                if(callback) callback(model);
             }
         }
 
@@ -1028,12 +1016,12 @@
             utils.localStorage.setItem(key, '[]');
             that.models.splice(0, that.models.length);
             that.emit('clear');
-            callback && callback();
+            if(callback) callback();
         }
 
         function broadcastHandler (data, callback) {
             that.emit('broadcast', data.payload);
-            callback && callback(data.payload);
+            if(callback) callback(data.payload);
         }
 
         function reconnectHandler () {
@@ -1085,7 +1073,7 @@
         socket.on('receipt:broadcast', function(data){
             broadcastHandler(data, function(data){
                 that.emit('receipt:broadcast', data);
-            })
+            });
         });
     };
 
@@ -1094,7 +1082,7 @@
     Endpoint.prototype.load = function(callback) {
         var that = this;
         var datas = utils.localStorage.getItem(this._key);
-        callback && this.once('load', callback, this);
+        if(callback) this.once('load', callback, this);
         if (datas) {
             var models = JSON.parse(datas).map(function(_model) {
                 return new Model(that, _model);
@@ -1107,16 +1095,16 @@
             this.models.splice.apply(this.models, models);
         }
         this.emit('load', this.models);
-    }
+    };
 
     Endpoint.prototype.commit = function(callback) {
-        callback && this.once('commit', callback);
+        if(callback) this.once('commit', callback);
         var models = this.models.map(function(model) {
             return model.get();
         });
         utils.localStorage.setItem(this._key, JSON.stringify(models));
         this.emit('commit');
-    }
+    };
 
     Endpoint.prototype.subscribe = function(options, callback) {
         if(typeof options == 'function') {
@@ -1138,17 +1126,17 @@
             sub();
         }
         return this;
-    }
+    };
 
     Endpoint.prototype.unsubscribe = function(callback) {
-        callback && this._socket.once('unsubscribe', callback);
+        if(callback) this._socket.once('unsubscribe', callback);
         this.models.splice(0, this.models.length);
         this._socket.emit('unsubscribe');
         this.emit('unsubscribed');
         this._subscribed = false;
         return this;
-    }
-
+    };
+  
     Endpoint.prototype.sync = function(callback) {
         this.load();
         var unsynced = this.models.filter(function(model) {
@@ -1156,72 +1144,72 @@
         }).map(function(model) {
             return model.get();
         });
-        callback && this.once('receipt:sync', callback);
+        if(callback) this.once('receipt:sync', callback);
         this._socket.emit('sync', unsynced);
         return this;
-    }
+    };
 
     Endpoint.prototype.post = function(record, callback) {
         var model = new Model(this, record);
-        callback && model.once('receipt:post', callback);
+        if(callback) model.once('receipt:post', callback);
         model.post();
         return this;
-    }
+    };
 
     Endpoint.prototype.create = function(params, callback) {
         var model = new Model(this, params);
         model.post(callback);
         return this;
-    }
+    };
 
     Endpoint.prototype.put = function(id, record, callback) {
         var model = this.find(id);
         if (model) {
-            callback && model.once('receipt:put', callback);
+            if(callback) model.once('receipt:put', callback);
             model.put(record);
         }
         return this;
-    }
+    };
 
     Endpoint.prototype.delete = function(id, callback) {
         var model = this.find(id);
         if (model) {
-            callback && model.once('receipt:delete', callback);
+            if(callback) model.once('receipt:delete', callback);
             model.delete();
         }
         return this;
-    }
+    };
 
     Endpoint.prototype.clear = function(callback) {
-        callback && this._socket.once('receipt:clear', callback);
+        if(callback) this._socket.once('receipt:clear', callback);
         this._socket.emit('clear');
         return this;
-    }
+    };
 
     Endpoint.prototype.broadcast = function(payload, callback) {
-        callback && this.once('receipt:broadcast', callback);
+        if(callback) this.once('receipt:broadcast', callback);
         this._socket.emit('broadcast', {
             payload: payload
         });
         return this;
-    }
+    };
 
     Endpoint.prototype.close = function(callback) {
-        callback && this._socket.once('close', callback);
+        if(callback) this._socket.once('close', callback);
         this._socket.close('close');
         return this;
-    }
+    };
 
     // Queries
     Endpoint.prototype.find = function(id) {
         return this.models.filter(function(model) {
             return model.id == id;
         }).pop();
-    }
+    };
 
     Endpoint.prototype.where = function(filter) {
         return new Query(this, filter);
-    }
+    };
 
     /**
      * Query start
@@ -1266,28 +1254,28 @@
             that.emit('merge');
         });
         this.run.call(that);
-    }
+    };
 
     Query.prototype = Object.create(Eev.prototype);
 
     Query.prototype.run = function() {
         this.models = this._endpoint.models.filter(this._filter);
         return this;
-    }
+    };
 
     Query.prototype.put = function(record) {
         this.models.forEach(function(model) {
             model.put(record);
         });
         return this;
-    }
+    };
 
     Query.prototype.delete = function() {
         this.models.forEach(function(model) {
             model.delete();
         });
         return this;
-    }
+    };
 
     exports.Model = Model;
     exports.Query = Query;
