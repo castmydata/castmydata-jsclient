@@ -1032,7 +1032,7 @@
         function broadcastHandler (data, callback) {
             that.emit('broadcast', data);
             that.emit('broadcast:' + data.channel, data.payload);
-            if(callback) callback(data.payload);
+            if(callback) callback(data);
         }
 
         function reconnectHandler () {
@@ -1083,12 +1083,12 @@
         });
         socket.on('receipt:listen', function(channel){
             listenHandler(channel, function(channel){
-                that.emit('receipt:listen', channel);
+                that.emit('receipt:listen:' + channel, channel);
             });
         });
         socket.on('receipt:unlisten', function(channel){
             unlistenHandler(channel, function(channel){
-                that.emit('receipt:unlisten', channel);
+                that.emit('receipt:unlisten:' + channel, channel);
             });
         });
         socket.on('receipt:broadcast', function(data){
@@ -1208,13 +1208,13 @@
     };
 
     Endpoint.prototype.listen = function(channel, callback) {
-        if(callback) this.once('receipt:listen', callback);
+        if(callback) this.once('receipt:listen:' + channel, callback);
         this._socket.emit('listen', channel);
         return this;
     };
 
     Endpoint.prototype.unlisten = function(channel, callback) {
-        if(callback) this.once('receipt:unlisten', callback);
+        if(callback) this.once('receipt:unlisten:' + channel, callback);
         this._socket.emit('unlisten', channel);
         return this;
     };
