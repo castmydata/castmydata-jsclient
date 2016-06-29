@@ -1030,7 +1030,8 @@
         }
 
         function broadcastHandler (data, callback) {
-            that.emit('broadcast', data.payload);
+            that.emit('broadcast', data);
+            that.emit('broadcast:' + data.channel, data.payload);
             if(callback) callback(data.payload);
         }
 
