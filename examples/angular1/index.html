@@ -6,8 +6,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v3.2.0/src/castmydata.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v3.2.0/src/ng-castmydata.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.0.0/src/castmydata.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.0.0/src/ng-castmydata.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
     <style>
         .list-group-item {
@@ -59,6 +59,7 @@
                 // create new connection
                 var endpoint = NgCastMyDataEndpoint('testendpoint')
                     .subscribe()
+                    .listen('some-channel')
                     .bindToScope($scope, 'records');
 
                 $scope.broadcast = function(message) {
@@ -68,7 +69,7 @@
                 }
 
                 // on broadcast do this
-                endpoint.on('broadcast', function(message){
+                endpoint.on('broadcast:some-channel', function(message){
                     $scope.received = message;
                 });
 
@@ -149,6 +150,7 @@ var endpoint =
 <pre>
 var endpoint = 
     NgCastMyDataEndpoint('testendpoint')
+    .listen('some-channel')
     .subscribe();
 
 $scope.broadcast = function(message) {
@@ -158,7 +160,7 @@ $scope.broadcast = function(message) {
 }
 
 // on broadcast do this
-endpoint.on('broadcast', function(message){
+endpoint.on('broadcast:some-channel', function(message){
     $scope.received = message;
 });
 </pre>
