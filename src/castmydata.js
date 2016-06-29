@@ -1019,6 +1019,16 @@
             if(callback) callback();
         }
 
+        function listenHandler (channel, callback) {
+            that.emit('listen', channel);
+            if(callback) callback(channel);
+        }
+
+        function unlistenHandler (channel, callback) {
+            that.emit('unlisten', channel);
+            if(callback) callback(channel);
+        }
+
         function broadcastHandler (data, callback) {
             that.emit('broadcast', data.payload);
             if(callback) callback(data.payload);
@@ -1068,6 +1078,16 @@
         socket.on('receipt:clear', function(){
             clearHandler(function(){
                 that.emit('receipt:clear');
+            });
+        });
+        socket.on('receipt:listen', function(channel){
+            listenHandler(channel, function(channel){
+                that.emit('receipt:listen', channel);
+            });
+        });
+        socket.on('receipt:unlisten', function(channel){
+            unlistenHandler(channel, function(channel){
+                that.emit('receipt:unlisten', channel);
             });
         });
         socket.on('receipt:broadcast', function(data){
@@ -1186,9 +1206,22 @@
         return this;
     };
 
-    Endpoint.prototype.broadcast = function(payload, callback) {
+    Endpoint.prototype.listen = function(channel, callback) {
+        if(callback) this.once('receipt:listen', callback);
+        this._socket.emit('listen', channel);
+        return this;
+    };
+
+    Endpoint.prototype.unlisten = function(channel, callback) {
+        if(callback) this.once('receipt:unlisten', callback);
+        this._socket.emit('unlisten', channel);
+        return this;
+    };
+
+    Endpoint.prototype.broadcast = function(channel, payload, callback) {
         if(callback) this.once('receipt:broadcast', callback);
         this._socket.emit('broadcast', {
+            channel: channel,
             payload: payload
         });
         return this;
