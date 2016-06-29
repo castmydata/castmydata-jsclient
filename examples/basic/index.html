@@ -75,15 +75,17 @@ endpoint.subscribe();
 var endpoint = new CastMyData
     .Endpoint('https://www.castmydata.com',
         'testendpoint');
-endpoint.subscribe();
+endpoint
+    .subscribe()
+    .listen('some-channel');
 
-endpoint.on('broadcast', function(message){
+endpoint.on('broadcast:some-channel', function(message){
     $('#received').text(message);
 });
 
 function broadcast() {
     var messageEl = $('#message');
-    endpoint.broadcast(messageEl.val());
+    endpoint.broadcast('some-channel', messageEl.val());
     messageEl.val('');
     return false;
 }
@@ -208,7 +210,7 @@ query.on('sync post put delete clear merge', function(){
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v3.2.0/dist/castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.0.0/dist/castmydata.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

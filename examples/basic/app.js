@@ -1,6 +1,8 @@
 
 var endpoint = new CastMyData.Endpoint('https://www.castmydata.com', 'testendpoint');
-endpoint.subscribe();
+endpoint
+    .subscribe()
+    .listen('some-channel');
 
 // Example 1: Broadcasting
 
@@ -10,7 +12,7 @@ endpoint.on('broadcast', function(message){
 
 function broadcast() {
     var messageEl = $('#message');
-    endpoint.broadcast(messageEl.val());
+    endpoint.broadcast('some-channel', messageEl.val());
     messageEl.val('');
     return false;
 }
