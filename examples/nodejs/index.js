@@ -38,7 +38,7 @@ endpoint.on('delete', function(data){
 });
 
 // Handle broadcasts
-endpoint.on('broadcast', function(message){
+endpoint.on('broadcast:some-channel', function(message){
     console.log(message);
 });
 
@@ -48,7 +48,7 @@ endpoint.on('clear', function(){
 });
 
 // Broadcast some data
-endpoint.broadcast('hey there!');
+endpoint.broadcast('some-channel', 'hey there!');
 
 // Create some data
 endpoint.post({
