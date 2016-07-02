@@ -6,7 +6,7 @@ endpoint
 
 // Example 1: Broadcasting
 
-endpoint.on('broadcast', function(message){
+endpoint.on('broadcast:some-channel', function(message){
     $('#received').text(message);
 });
 
