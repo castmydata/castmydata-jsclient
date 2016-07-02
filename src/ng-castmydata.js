@@ -2,13 +2,12 @@
 // globals io:true define:true
 
 (function() {
-        'use strict';
+    'use strict';
   
     angular.module('NgCastMyData', [])
         .value('CastMyDataServer', '')
         .factory('NgCastMyDataEndpoint', ['CastMyDataServer', '$timeout',
-            function(CastMyDataServer, $timeout, options) {
-                options = options || {};
+            function(CastMyDataServer, $timeout) {
                 var endpoints = {};
                 CastMyData.Model.prototype.bindToScope = function($scope, param) {
                     $scope[param] = this;
@@ -50,8 +49,9 @@
                     return this;
                 };
 
-                return function(path) {
+                return function(path, options) {
                     if (!endpoints.path) {
+                        options = options || {};
                         return new CastMyData.Endpoint(CastMyDataServer, path, options);
                     }
                     return endpoints.path;
