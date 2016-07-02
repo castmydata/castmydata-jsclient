@@ -7,7 +7,7 @@ var endpoint = new client.Endpoint('https://www.castmydata.com', 'testendpoint')
 endpoint.subscribe();
 
 // Handle records
-endpoint.on('records', function(records){
+endpoint.on('sync', function(records){
     console.log(records);
 });
 
