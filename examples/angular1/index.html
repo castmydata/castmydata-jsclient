@@ -64,7 +64,7 @@
 
                 $scope.broadcast = function(message) {
                     //  broadcast this message
-                    endpoint.broadcast(message);
+                    endpoint.broadcast('some-channel', message);
                     $scope.message = '';
                 }
 
@@ -155,7 +155,7 @@ var endpoint =
 
 $scope.broadcast = function(message) {
     //  broadcast this message
-    endpoint.broadcast(message);
+    endpoint.broadcast('some-channel', message);
     $scope.message = '';
 }
 
