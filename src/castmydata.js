@@ -810,6 +810,8 @@
 
     Model.prototype.post = function(callback) {
 
+        var that = this;
+
         if (callback) this._endpoint._socket.once('post', callback);
 
         // update properties
@@ -833,12 +835,24 @@
         this.emit('post', this);
         this._endpoint.emit('post', this);
 
+        // handle acl deny
+        this._endpoint._socket.once('denied:post:' + this.id, function(){
+            var index = that._endpoint.models.indexOf(that);
+            if(index > -1) {
+                that._endpoint.models.splice(index, 1);
+                that._endpoint.commit();
+                that._endpoint.emit('post', that.id)
+            }
+        });
+
         // emit socket
         this._endpoint._socket.emit('post', this.get());
         return this;
     };
 
     Model.prototype.put = function(params, callback) {
+
+        var that = this;
       
         // update properties
         Object.deepExtend(this, params);
@@ -852,12 +866,22 @@
         this.emit('put', this, params);
         this._endpoint.emit('put', this, params);
 
+        // handle acl deny
+        this._endpoint._socket.once('denied:put:' + this.id, function(data){
+            Object.deepExtend(that, data);
+            that._endpoint.commit();
+            that.emit('put');
+            that._endpoint.emit('put');
+        });
+
         // emit socket
         this._endpoint._socket.emit('put', this.get());
         return this;
     };
 
     Model.prototype.delete = function(callback) {
+
+        var that = this;
 
         if(callback) this._endpoint._socket.once('delete', callback);
 
@@ -876,6 +900,14 @@
         // emit events
         this.emit('delete', this);
         this._endpoint.emit('delete', this);
+
+        // handle acl deny
+        this._endpoint._socket.once('denied:delete:' + this.id, function(data){
+            Object.deepExtend(that, data);
+            that._endpoint.commit();
+            that.emit('delete');
+            that._endpoint.emit('delete');
+        });
 
         // emit socket
         this._endpoint._socket.emit('delete', this.id);
