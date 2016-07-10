@@ -1170,16 +1170,12 @@
         return this;
     };
 
-    Endpoint.prototype.post = function(record, callback) {
-        var model = new Model(this, record);
+    Endpoint.prototype.post = 
+    Endpoint.prototype.create = 
+    function(record, callback) {
+        var model = new this._Model(this, record);
         if(callback) model.once('receipt:post', callback);
         model.post();
-        return this;
-    };
-
-    Endpoint.prototype.create = function(params, callback) {
-        var model = new Model(this, params);
-        model.post(callback);
         return this;
     };
 
