@@ -836,6 +836,18 @@
         this.emit('post', this);
         this._endpoint.emit('post', this);
 
+        // handle acl deny
+        this._endpoint._socket.once('denied:post:' + this.id, function(){
+            // deregister callback
+            that._endpoint._socket.off('receipt:post', callback);
+            var index = that._endpoint.models.indexOf(that);
+            if(index > -1) {
+                that._endpoint.models.splice(index, 1);
+                that._endpoint.commit();
+                that._endpoint.emit('post', that.id)
+            }
+        });
+
         // emit socket
         this._endpoint._socket.emit('post', this.get());
         return this;
@@ -859,6 +871,16 @@
         // emit events
         this.emit('put', this, params);
         this._endpoint.emit('put', this, params);
+
+        // handle acl deny
+        this._endpoint._socket.once('denied:put:' + this.id, function(data){
+            // deregister callback
+            that._endpoint._socket.off('receipt:put', callback);
+            Object.deepExtend(that, data);
+            that._endpoint.commit();
+            that.emit('put');
+            that._endpoint.emit('put');
+        });
 
         // emit socket
         this._endpoint._socket.emit('put', this.get());
@@ -887,6 +909,16 @@
         // emit events
         this.emit('delete', this);
         this._endpoint.emit('delete', this);
+
+        // handle acl deny
+        this._endpoint._socket.once('denied:delete:' + this.id, function(data){
+            // deregister callback
+            that._endpoint._socket.off('receipt:delete', callback);
+            Object.deepExtend(that, data);
+            that._endpoint.commit();
+            that.emit('delete');
+            that._endpoint.emit('delete');
+        });
 
         // emit socket
         this._endpoint._socket.emit('delete', this.id);
