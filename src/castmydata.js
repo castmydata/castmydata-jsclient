@@ -810,7 +810,10 @@
 
     Model.prototype.post = function(callback) {
 
-        if (callback) this._endpoint._socket.once('post', callback);
+        var that = this;
+
+        // register callback
+        if (callback) this._endpoint._socket.once('receipt:post', callback);
 
         // update properties
         var params = {
@@ -839,6 +842,11 @@
     };
 
     Model.prototype.put = function(params, callback) {
+
+        var that = this;
+
+        // register callback
+        if (callback) this._endpoint._socket.once('receipt:put', callback);
       
         // update properties
         Object.deepExtend(this, params);
@@ -859,7 +867,10 @@
 
     Model.prototype.delete = function(callback) {
 
-        if(callback) this._endpoint._socket.once('delete', callback);
+        var that = this;
+
+        // register callback
+        if (callback) this._endpoint._socket.once('receipt:delete', callback);
 
         // clear properties
         for(var key in this) {
