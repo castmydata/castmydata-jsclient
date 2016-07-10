@@ -913,6 +913,7 @@
             throw 'Invalid characters in path. Allowed characters are a-z, A-Z, 0-9, -, _, .';
         }
 
+        this._Model = this._options.model || Model;
         this.models = [];
         this._socket = [];
         this._events = {};
@@ -945,7 +946,7 @@
                 that.emit('merge', model);
             } else {
                 // create model
-                model = new Model(that, _model);
+                model = new that._Model(that, _model);
 
                 // add to models
                 that.models.push(model);
@@ -973,7 +974,7 @@
                 model.emit('merge', model);
                 that.emit('merge', model);
             } else {
-                model = new Model(that, record);
+                model = new that._Model(that, record);
                 that.models.push(model);
                 that.commit();
             }
@@ -1106,7 +1107,7 @@
         if(callback) this.once('load', callback, this);
         if (datas) {
             var models = JSON.parse(datas).map(function(_model) {
-                return new Model(that, _model);
+                return new that._Model(that, _model);
             });
             if(this._filter) {
                 models = utils.sift(this._filter, models);
