@@ -777,6 +777,7 @@
         }
     };
 
+    utils.EventEmitter = Eev;
 
     var getRecord = function(model) {
         var record = {};
