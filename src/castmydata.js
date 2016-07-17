@@ -1333,7 +1333,7 @@
     Query.prototype = Object.create(Eev.prototype);
 
     Query.prototype.run = function() {
-        this.models = this._endpoint.models.filter(this._filter);
+        this.models = utils.sift(this._filter, this._endpoint.models);
         return this;
     };
 
