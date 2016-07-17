@@ -6,8 +6,6 @@
   
     if (typeof exports === 'object' && typeof module !== 'undefined') {
         factory(exports);
-    } else if (typeof define === 'function' && define.amd) {
-        define(['exports'], factory);
     } else {
         factory((global.CastMyData = global.CastMyData || {}));
     }
