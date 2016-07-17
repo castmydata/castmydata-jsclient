@@ -3,7 +3,7 @@
 
 (function(global, factory) {
     'use strict';
-  
+
     if (typeof exports === 'object' && typeof module !== 'undefined') {
         factory(exports);
     } else {
@@ -527,7 +527,7 @@
             }
         };
 
-        
+
         utils.sift = sift;
     })(utils);
 
@@ -858,7 +858,7 @@
 
         // register callback
         if (callback) this._endpoint._socket.once('receipt:put', callback);
-      
+
         // update properties
         Object.deepExtend(this, params);
         this.meta.synced = false;
@@ -1200,7 +1200,7 @@
         this._subscribed = false;
         return this;
     };
-  
+
     Endpoint.prototype.sync = function(callback) {
         this.load();
         var unsynced = this.models.filter(function(model) {
@@ -1213,8 +1213,8 @@
         return this;
     };
 
-    Endpoint.prototype.post = 
-    Endpoint.prototype.create = 
+    Endpoint.prototype.post =
+    Endpoint.prototype.create =
     function(record, callback) {
         var model = new this._Model(this, record);
         if(callback) model.once('receipt:post', callback);
