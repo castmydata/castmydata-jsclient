@@ -1,7 +1,7 @@
 (function() {
 
     var localWrapperFactory = require('./localWrapperFactory');
-    var indexeddb = require('./indexeddb');
+    // var indexeddb = require('./indexeddb');
     var memory = require('./memory');
     var jjlc = require('./jjlc');
     var localStorage = (typeof localStorage !== 'undefined') ? localStorage : (require('node-localstorage'));
