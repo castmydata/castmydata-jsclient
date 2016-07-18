@@ -4,13 +4,12 @@
     var indexeddb = require('./indexeddb');
     var memory = require('./memory');
     var jjlc = require('./jjlc');
+    var localStorage = (typeof localStorage !== 'undefined') ? localStorage : (require('node-localstorage'));
     var drivers = {
         jjlc: localWrapperFactory(jjlc),
         memory: localWrapperFactory(memory),
+        localStorage: localWrapperFactory(localStorage),
     };
-    if(typeof localStorage !== 'undefined') {
-        drivers.localStorage = localWrapperFactory(localStorage);
-    }
 
     function Storage(path, options) {
         var self = this;
