@@ -1,6 +1,10 @@
 (function() {
 
-    var localStorage = (typeof localStorage !== 'undefined') ? localStorage : (require('node-localstorage'));
+    var localStorage = (typeof localStorage !== 'undefined') ? localStorage : null;
+    if(!localStorage) {
+        var LocalStorage = require('node-localstorage').LocalStorage;
+        localStorage = new LocalStorage('./scratch');
+    }
 
     // https://github.com/k-yak/JJLC/blob/master/scripts/jjlc.dev.js
     var regex = /\"[a-zA-Z0-9]*\":/g,
