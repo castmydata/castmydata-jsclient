@@ -1,7 +1,9 @@
 var client = require('../../src/castmydata');
 
 // Create new endpoint
-var endpoint = new client.Endpoint('https://www.castmydata.com', 'testendpoint');
+var endpoint = new client.Endpoint('https://www.castmydata.com', 'testendpoint', {
+    storage: 'memory'
+});
 
 // Start subscription
 endpoint.subscribe();

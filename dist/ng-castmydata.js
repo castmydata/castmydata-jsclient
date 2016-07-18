@@ -3,7 +3,7 @@
 
     angular.module('NgCastMyData', [])
         .value('CastMyDataServer', '')
-        .factory('NgCastMyDataEndpoint', function(CastMyDataServer, $timeout) {
+        .factory('NgCastMyDataEndpoint', ["CastMyDataServer", "$timeout", function(CastMyDataServer, $timeout) {
             var endpoints = {};
             CastMyData.Model.prototype.bindToScope = function($scope, param) {
                 $scope[param] = this;
@@ -52,5 +52,5 @@
                 }
                 return endpoints.path;
             };
-        });
+        }]);
 }).call(this);

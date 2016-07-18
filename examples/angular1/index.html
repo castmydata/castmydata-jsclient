@@ -6,8 +6,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.6/socket.io.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular-animate.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.0.3/dist/castmydata.min.js"></script>
-    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.0.3/dist/ng-castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.1.0/dist/castmydata.min.js"></script>
+    <script src="https://cdn.rawgit.com/castmydata/castmydata-jsclient/v4.1.0/dist/ng-castmydata.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
     <style>
         .list-group-item {
@@ -94,7 +94,7 @@
 </head>
 <body ng-app="sample">
     <a href="https://github.com/castmydata/castmydata-jsclient"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
-    
+
     <div ng-controller="TodosController" class="container">
         <div>
             <img src="https://avatars3.githubusercontent.com/u/19713642?v=3&s=200" alt="castmydata-logo" id="logo">
@@ -105,7 +105,7 @@
         <div class="row">
             <div class="col-md-4">
 <pre>
-var endpoint = 
+var endpoint =
     NgCastMyDataEndpoint('testendpoint')
     .subscribe()
     .bindToScope($scope, 'records');
@@ -131,7 +131,7 @@ var endpoint =
                 <p><a href="{{href}}" target="_blank">Open Another Tab</a></p>
                 <ul class="list-group animate-container">
                     <li class="list-group-item animate-repeat">
-                        Last message received: <span ng-bind="received"></span>    
+                        Last message received: <span ng-bind="received"></span>
                     </li>
                     <li class="list-group-item animate-repeat">
                         <form ng-submit="broadcast(message)">
@@ -148,7 +148,7 @@ var endpoint =
                 </ul>
                 <br>
 <pre>
-var endpoint = 
+var endpoint =
     NgCastMyDataEndpoint('testendpoint')
     .listen('some-channel')
     .subscribe();
@@ -211,7 +211,7 @@ endpoint.on('broadcast:some-channel', function(message){
                 </ul>
                 <br>
 <pre>
-var endpoint = 
+var endpoint =
     NgCastMyDataEndpoint('testendpoint')
     .subscribe()
     .bindToScope($scope, 'records');
