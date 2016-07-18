@@ -5,7 +5,7 @@
     var storage = require('../storage');
     var Model = require('../modules/Model');
     var Query = require('../modules/Query');
-    var io = window ? window.io : null;
+    var io = (typeof window !== 'undefined') ? window.io : null;
 
     function Endpoint(CastMyDataServer, path, options) {
 
