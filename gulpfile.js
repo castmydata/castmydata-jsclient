@@ -46,8 +46,6 @@ gulp.task('castmydata', ['jshint-castmydata'], function() {
 
 gulp.task('ng-castmydata', ['jshint-ngcastmydata'], function() {
     return gulp.src('./src/ng-castmydata.js')
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
         .pipe(ngAnnotate())
         .pipe(gulp.dest('dist'))
         .pipe(rename('ng-castmydata.min.js'))
