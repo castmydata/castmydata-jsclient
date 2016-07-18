@@ -32,6 +32,7 @@ gulp.task('castmydata', ['jshint-castmydata'], function() {
         standalone: 'CastMyData',
     })
     .ignore('socket.io-client')
+    .ignore('node-localstorage')
     .require('./src/castmydata.js', {
         expose: 'castmydata-jsclient',
     });
