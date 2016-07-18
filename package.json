@@ -2,7 +2,7 @@
   "name": "castmydata-jsclient",
   "version": "4.1.1",
   "description": "Client for CastMyData",
-  "main": "dist/castmydata.min.js",
+  "main": "src/castmydata.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
